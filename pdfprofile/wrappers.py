@@ -65,6 +65,6 @@ def pdfimages(args):
                 thisElt.text = thisValue
                 imageElt.append(thisElt)
             
-            pdfImagesElt.append(imageElt)                            
+            pdfImagesElt.append(imageElt)
 
     return pdfImagesElt
