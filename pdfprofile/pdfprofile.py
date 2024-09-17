@@ -432,6 +432,5 @@ def main():
     print("Elapsed time: " + str(timeInMinutes) + " minutes")
 
 
-
 if __name__ == "__main__":
     main()
