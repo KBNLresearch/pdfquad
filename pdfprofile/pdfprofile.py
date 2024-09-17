@@ -311,6 +311,9 @@ def processPDF(PDF):
             f.write(pdfResultXML)
         ## TEST
 
+        ## TODO: perhaps write XML output + Schematron report to file (VeraPDF style), either as 1 file
+        ## per PDF or combined for al PDFs. Optionally weed out duplicate failed-asserts from Schematron report
+
         try:
             # Start Schematron magic ...
             schematron = isoschematron.Schematron(mySchema,
@@ -332,6 +335,8 @@ def processPDF(PDF):
 
         # Parse output of Schematron validation and extract
         # interesting bits
+        ## TODO: weed out duplicate messages in ptOutString and append no. duplicates, e.g:
+        ## Test "(x-ppi > 299) and (x-ppi < 301)" failed (horizontale resolutie niet binnen acceptabele marges) (141x)
         try:
             schOutString = extractSchematron(report)
             ptOutString += schOutString
