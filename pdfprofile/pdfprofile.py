@@ -256,7 +256,8 @@ def processPDF(PDF):
     # Create list that contains all file path components (dir names)
     pathComponents, fName = getPathComponentsAsList(PDF)
 
-    # TODO Select schema based on value of parentDir (master/access/targets-jp2)
+    # TODO Select schema based on whether this is a PDF with 50% or 85%
+    # JPEG quality (from file name or path name pattern in batch?)
 
     """
     if "master" in pathComponents:
@@ -278,9 +279,9 @@ def processPDF(PDF):
         config.status = "fail"
         description = "Name of parent directory does not match any schema"
         ptOutString += description + config.lineSep
-
     """
 
+    # For now we just use this schema
     mySchema = config.schemaJPEG50LXMLElt
     schemaMatch = True
 
@@ -320,8 +321,8 @@ def processPDF(PDF):
             report = schematron.validation_report
 
             ## TEST write report to file
-            #with open("schematron-report.xml","w") as f:
-            #    f.write(report)
+            with open("schematron-report.xml","wb") as f:
+                f.write(report)
             ## TEST
 
         except Exception:

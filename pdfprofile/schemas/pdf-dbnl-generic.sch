@@ -11,10 +11,10 @@
 
     <!-- check of resolutiewaarden juist zijn (marge van +/- 5 ppi) -->
     <s:rule context="/pdf/pdfimages/image">
-        <s:assert test="(x-ppi &gt; 295) and
-        (x-ppi &lt; 305)">horizontale resolutie niet binnen acceptabele marges</s:assert>
-        <s:assert test="(y-ppi &gt; 295) and 
-        (y-ppi &lt; 305)">verticale resolutie niet binnen acceptabele marges</s:assert>
+        <s:assert test="(x-ppi &gt; 299) and
+        (x-ppi &lt; 301)">horizontale resolutie niet binnen acceptabele marges</s:assert>
+        <s:assert test="(y-ppi &gt; 299) and 
+        (y-ppi &lt; 301)">verticale resolutie niet binnen acceptabele marges</s:assert>
     </s:rule>
 
 </s:pattern>
