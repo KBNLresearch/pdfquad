@@ -221,6 +221,7 @@ def getPathComponentsAsList(path):
     folders.reverse()
     return(folders, fileComponent)
 
+
 def extractSchematron(report):
     """Parse output of Schematron validation and extract interesting bits"""
 
