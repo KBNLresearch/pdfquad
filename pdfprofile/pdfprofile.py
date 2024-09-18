@@ -327,8 +327,9 @@ def processPDF(PDF):
             description = "Schematron validation resulted in an error"
             ptOutString += description + config.lineSep
 
-        # Add Schematron report to report element
-        reportElt.append(etree.fromstring(str(report)))
+        # Re-parse Schematron report and add to report element
+        report = etree.fromstring(str(report))
+        reportElt.append(report)
         # Add all child elements to PDF element
         pdfElt.append(fPathElt)
         pdfElt.append(fSizeElt)
@@ -337,8 +338,6 @@ def processPDF(PDF):
 
         # Parse output of Schematron validation and extract
         # interesting bits
-        ## TODO: weed out duplicate messages in ptOutString and append no. duplicates, e.g:
-        ## Test "(x-ppi > 299) and (x-ppi < 301)" failed (horizontale resolutie niet binnen acceptabele marges) (141x)
         try:
             schOutString = extractSchematron(report)
             ptOutString += schOutString
@@ -432,6 +431,8 @@ def main():
                                     pretty_print=True)
 
     # Write XML to file
+    ## TODO: implement incremental updates (see Jpylyzer) to avoid memory
+    # problems or data loss in case of unexpected crashes!
     with open(prefixOut + ".xml","wb") as f:
         f.write(outXML)
 
