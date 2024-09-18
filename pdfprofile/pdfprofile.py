@@ -140,20 +140,20 @@ def readProfile(profile, profilesDir, schemasDir):
         errorExit(msg)
 
     # Locate schema elements
-    schemaJPEG50Element = prof.find("schemaJPEG50")
-    schemaJPEG85Element = prof.find("schemaJPEG85")
+    schemaLowQualityElement = prof.find("schemaLowQuality")
+    schemaHighQualityElement = prof.find("schemaHighQuality")
 
     # Get corresponding text values
-    schemaJPEG50 = os.path.join(schemasDir, schemaJPEG50Element.text)
-    schemaJPEG85 = os.path.join(schemasDir, schemaJPEG85Element.text)
+    schemaLowQuality = os.path.join(schemasDir, schemaLowQualityElement.text)
+    schemaHighQuality = os.path.join(schemasDir, schemaHighQualityElement.text)
  
     # Check if all files exist, and exit if not
-    checkFileExists(schemaJPEG50)
-    checkFileExists(schemaJPEG85)
+    checkFileExists(schemaLowQuality)
+    checkFileExists(schemaHighQuality)
 
     # Add schemas to a dictionary
-    schemas = {"schemaJPEG50": schemaJPEG50,
-               "schemaJPEG85": schemaJPEG85}
+    schemas = {"schemaLowQuality": schemaLowQuality,
+               "schemaHighQuality": schemaHighQuality}
 
     return schemas
 
@@ -283,7 +283,7 @@ def processPDF(PDF):
     """
 
     # For now we just use this schema
-    mySchema = config.schemaJPEG50LXMLElt
+    mySchema = config.schemaLowQualityLXMLElt
     schemaMatch = True
 
     if schemaMatch:
@@ -384,12 +384,12 @@ def main():
     # Get schema locations from profile
     schemas = readProfile(profile, profilesDir, schemasDir)
 
-    schemaJPEG50 = schemas["schemaJPEG50"]
-    schemaJPEG85 = schemas["schemaJPEG85"]
+    schemaLowQuality = schemas["schemaLowQuality"]
+    schemaHighQuality = schemas["schemaHighQuality"]
  
     # Get schemas as lxml.etree elements
-    config.schemaJPEG50LXMLElt = readAsLXMLElt(schemaJPEG50)
-    config.schemaJPEG85LXMLElt = readAsLXMLElt(schemaJPEG85)
+    config.schemaLowQualityLXMLElt = readAsLXMLElt(schemaLowQuality)
+    config.schemaHighQualityLXMLElt = readAsLXMLElt(schemaHighQuality)
  
     # Set line separator for output/ log files to OS default
     config.lineSep = "\n"

@@ -13,9 +13,8 @@ DBNL fulltext
 in both cases because we can't reliably test JPEG quality!)
 -->
 
-<schemaJPEG50>pdf-dbnl-generic.sch</schemaJPEG50>
-<schemaJPEG85>pdf-dbnl-generic.sch</schemaJPEG85>
-
+<schemaLowQuality>pdf-dbnl-generic.sch</schemaLowQuality>
+<schemaHighQuality>pdf-dbnl-generic.sch</schemaHighQuality>
 
 </profile>
 
