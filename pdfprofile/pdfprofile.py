@@ -257,6 +257,17 @@ def processPDF(PDF):
     # Create list that contains all file path components (dir names)
     pathComponents, fName = getPathComponentsAsList(PDF)
 
+    # Create output element for this PDF
+    pdfElt = etree.Element("file")
+    fPathElt = etree.Element("filePath")
+    fPathElt.text = PDF
+    fSizeElt = etree.Element("fileSize")
+    fSizeElt.text = str(os.path.getsize(PDF))
+
+    # Create elements to store properties and Schematron report
+    propertiesElt = etree.Element("properties")
+    reportElt = etree.Element("schematronReport")
+
     # TODO Select schema based on whether this is a PDF with 50% or 85%
     # JPEG quality (from file name or path name pattern in batch?)
 
@@ -288,9 +299,6 @@ def processPDF(PDF):
 
     if schemaMatch:
 
-        # Create root element for this PDF
-        pdfElt = etree.Element("pdf")
-
         # Run Poppler tools on image and write result to text file
         try:
             args = ['pdfimages']
@@ -302,37 +310,30 @@ def processPDF(PDF):
             description = "Error running pdfimages"
             ptOutString += description + config.lineSep
 
-        # Add tool-specific elements to PDF root element
-        pdfElt.append(resultPDFImages)
-        # Convert to XML
-        pdfResultXML = etree.tostring(pdfElt, method='xml', encoding='utf-8')
-
-        ## TEST write XML to file
-        with open("test.xml","wb") as f:
-            f.write(pdfResultXML)
-        ## TEST
-
-        ## TODO: perhaps write XML output + Schematron report to file (VeraPDF style), either as 1 file
-        ## per PDF or combined for al PDFs. Optionally weed out duplicate failed-asserts from Schematron report
+        # Add tool-specific elements to properties element
+        propertiesElt.append(resultPDFImages)
 
         try:
             # Start Schematron magic ...
             schematron = isoschematron.Schematron(mySchema,
                                                   store_report=True)
-            
-            # Validate tools output against schema
-            schemaValidationResult = schematron.validate(pdfElt)
-            report = schematron.validation_report
 
-            ## TEST write report to file
-            with open("schematron-report.xml","wb") as f:
-                f.write(report)
-            ## TEST
+            # Validate tools output against schema
+            schemaValidationResult = schematron.validate(propertiesElt)
+            report = schematron.validation_report
 
         except Exception:
             config.status = "fail"
             description = "Schematron validation resulted in an error"
             ptOutString += description + config.lineSep
+
+        # Add Schematron report to report element
+        reportElt.append(etree.fromstring(str(report)))
+        # Add all child elements to PDF element
+        pdfElt.append(fPathElt)
+        pdfElt.append(fSizeElt)
+        pdfElt.append(propertiesElt)
+        pdfElt.append(reportElt)
 
         # Parse output of Schematron validation and extract
         # interesting bits
@@ -356,6 +357,8 @@ def processPDF(PDF):
     statusLine = PDF + "," + config.status + config.lineSep
     config.fStatus.write(statusLine)
 
+    return pdfElt
+
 
 def main():
     """Main function"""
@@ -364,7 +367,6 @@ def main():
     packageDir = os.path.dirname(os.path.abspath(__file__))
 
     # Profiles and schemas dirs.
-
     profilesDir = os.path.join(packageDir, "profiles")
     schemasDir = os.path.join(packageDir, "schemas")
 
@@ -394,6 +396,9 @@ def main():
     # Set line separator for output/ log files to OS default
     config.lineSep = "\n"
 
+    # Root element to which we will add output for all PDFs
+    rootElt = etree.Element("pdfprofile")
+
     # Open log files for writing (append)
 
     # File with summary of quality check status (pass/fail) for each image
@@ -416,13 +421,26 @@ def main():
     # Iterate over all PDFs
     for myPDF in listPDFs:
         myPDF = os.path.abspath(myPDF)
-        processPDF(myPDF)
+        pdfResult = processPDF(myPDF)
+        rootElt.append(pdfResult)
 
-    end = time.time()
+    # Convert output to XML
+    outXML = etree.tostring(rootElt, 
+                                    method='xml',
+                                    encoding='utf-8',
+                                    xml_declaration=True,
+                                    pretty_print=True)
+
+    # Write XML to file
+    with open(prefixOut + ".xml","wb") as f:
+        f.write(outXML)
 
     # Close output files
     config.fStatus.close()
     config.fFailed.close()
+
+    # Timing output
+    end = time.time()
 
     print("pdfprofile ended: " + time.asctime())
 

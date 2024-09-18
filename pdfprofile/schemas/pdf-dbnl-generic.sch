@@ -10,7 +10,7 @@
     <s:title>DBNL PDFs</s:title>
 
     <!-- check of resolutiewaarden juist zijn (marge van +/- 5 ppi) -->
-    <s:rule context="/pdf/pdfimages/image">
+    <s:rule context="/properties/pdfimages/image">
         <s:assert test="(x-ppi &gt; 299) and
         (x-ppi &lt; 301)">horizontale resolutie niet binnen acceptabele marges</s:assert>
         <s:assert test="(y-ppi &gt; 299) and 
