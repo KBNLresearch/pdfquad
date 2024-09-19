@@ -396,7 +396,7 @@ def main():
     config.lineSep = "\n"
 
     # Root element to which we will add output for all PDFs
-    rootElt = etree.Element("pdfprofile")
+    rootElt = etree.Element("pdfbatchqa")
 
     # Open log files for writing (append)
 
@@ -415,7 +415,7 @@ def main():
 
     # start clock for statistics
     start = time.time()
-    print("pdfprofile started: " + time.asctime())
+    print("pdfbatchqa started: " + time.asctime())
 
     # Iterate over all PDFs
     for myPDF in listPDFs:
@@ -443,7 +443,7 @@ def main():
     # Timing output
     end = time.time()
 
-    print("pdfprofile ended: " + time.asctime())
+    print("pdfbatchqa ended: " + time.asctime())
 
     # Elapsed time (seconds)
     timeElapsed = end - start

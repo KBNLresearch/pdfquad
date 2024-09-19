@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Setup script for pdfprofile"""
+"""Setup script for pdfbatchqa"""
 import codecs
 import os
 import re
@@ -26,9 +26,9 @@ README = open('README.md', 'r')
 README_TEXT = README.read()
 README.close()
 
-setup(name='pdfprofile',
+setup(name='pdfbatchqa',
       packages=find_packages(),
-      version=find_version('pdfprofile', 'pdfprofile.py'),
+      version=find_version('pdfbatchqa', 'pdfbatchqa.py'),
       license='LGPL',
       install_requires=INSTALL_REQUIRES,
       python_requires=PYTHON_REQUIRES,
@@ -40,14 +40,14 @@ setup(name='pdfprofile',
       author_email='johan.vanderknijff@kb.nl',
       maintainer='Johan van der Knijff',
       maintainer_email='johan.vanderknijff@kb.nl',
-      url='https://github.com/KBNLresearch/pdfprofile',
-      download_url='https://github.com/KBNLresearch/pdfprofile/archive/' \
-        + find_version('pdfprofile', 'pdfprofile.py') + '.tar.gz',
-      package_data={'pdfprofile': ['*.*',
+      url='https://github.com/KBNLresearch/pdfbatchqa',
+      download_url='https://github.com/KBNLresearch/pdfbatchqa/archive/' \
+        + find_version('pdfbatchqa', 'pdfbatchqa.py') + '.tar.gz',
+      package_data={'pdfbatchqa': ['*.*',
                                 'profiles/*.*',
                                 'schemas/*.*']},
       entry_points={'console_scripts': [
-          'pdfprofile = pdfprofile.pdfprofile:main',
+          'pdfbatchqa = pdfbatchqa.pdfbatchqa:main',
       ]},
       classifiers=[
           'Environment :: Console',
