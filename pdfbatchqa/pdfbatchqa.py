@@ -377,6 +377,7 @@ def main():
 
     batchDir = args.batchDir
     prefixOut = args.prefixOut
+    fileOut = prefixOut + ".xml"
 
     profile = args.profile
     if profile in["l", "list"]:
@@ -394,9 +395,6 @@ def main():
  
     # Set line separator for output/ log files to OS default
     config.lineSep = "\n"
-
-    # Root element to which we will add output for all PDFs
-    rootElt = etree.Element("pdfbatchqa")
 
     # Open log files for writing (append)
 
@@ -417,24 +415,32 @@ def main():
     start = time.time()
     print("pdfbatchqa started: " + time.asctime())
 
+    # Write XML header
+    xmlHead = "<?xml version='1.0' encoding='UTF-8'?>\n"
+    xmlHead += "<pdfbatchqa>\n"
+
+    with open(fileOut,"wb") as f:
+        f.write(xmlHead.encode('utf-8'))
+
     # Iterate over all PDFs
     for myPDF in listPDFs:
         myPDF = os.path.abspath(myPDF)
         pdfResult = processPDF(myPDF)
-        rootElt.append(pdfResult)
+        # Convert output to XML and add to output file
+        outXML = etree.tostring(pdfResult,
+                                method='xml',
+                                encoding='utf-8',
+                                xml_declaration=False,
+                                pretty_print=True)
 
-    # Convert output to XML
-    outXML = etree.tostring(rootElt, 
-                                    method='xml',
-                                    encoding='utf-8',
-                                    xml_declaration=True,
-                                    pretty_print=True)
+        with open(fileOut,"ab") as f:
+            f.write(outXML)
 
-    # Write XML to file
-    ## TODO: implement incremental updates (see Jpylyzer) to avoid memory
-    # problems or data loss in case of unexpected crashes!
-    with open(prefixOut + ".xml","wb") as f:
-        f.write(outXML)
+    # Write XML footer
+    xmlFoot = "</pdfbatchqa>\n"
+
+    with open(fileOut,"ab") as f:
+        f.write(xmlFoot.encode('utf-8'))
 
     # Close output files
     config.fStatus.close()
