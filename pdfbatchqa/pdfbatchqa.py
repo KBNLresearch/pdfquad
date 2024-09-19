@@ -300,16 +300,10 @@ def processPDF(PDF):
     if schemaMatch:
 
         # Run Poppler tools on image and write result to text file
-        try:
-            args = ['pdfimages']
-            args.append('-list')
-            args.append(PDF)
-            resultPDFImages = wrappers.pdfimages(args)
-        except Exception:
-            config.status = "fail"
-            description = "Error running pdfimages"
-            ptOutString += description + config.lineSep
-
+        args = ['pdfimages']
+        args.append('-list')
+        args.append(PDF)
+        resultPDFImages = wrappers.pdfimages(args)
         # Add tool-specific elements to properties element
         propertiesElt.append(resultPDFImages)
 

@@ -3,24 +3,9 @@
 
 import subprocess as sub
 from lxml import etree
-from . import config
-
-def getReadErrors(rescueLine):
-    """parse ddrescue output line for values of readErrors"""
-    lineItems = rescueLine.split(",")
-
-    for item in lineItems:
-        # Note that 'errors' item was renamed to 'read errors' between ddrescue 1.19 and 1.22
-        # This should work in either case
-        if "errors:" in item:
-            reEntry = item.split(":")
-            readErrors = int(reEntry[1].strip())
-
-    return readErrors
-
 
 def pdfimages(args):
-    """pdfimages wapper function"""
+    """pdfimages wrapper function"""
 
     success = False
     # Create Element object to hold pdfimages output
@@ -31,7 +16,8 @@ def pdfimages(args):
                       shell=False, bufsize=1, universal_newlines=True)
         stdout, stderr = p.communicate()
         exitStatus = p.returncode
-        success = True
+        if exitStatus == 0:
+            success = True
 
     except Exception:
         # I don't even want to to start thinking how one might end up here ...
