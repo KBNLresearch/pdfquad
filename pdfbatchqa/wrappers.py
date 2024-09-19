@@ -54,3 +54,40 @@ def pdfimages(args):
             pdfImagesElt.append(imageElt)
 
     return pdfImagesElt
+
+
+def pdfinfo(args):
+    """pdfinfo wrapper function"""
+
+    success = False
+    # Create Element object to hold pdfinfo output
+    pdfInfoElt = etree.Element("pdfinfo")
+
+    try:
+        p = sub.Popen(args, stdout=sub.PIPE, stderr=sub.PIPE,
+                      shell=False, bufsize=1, universal_newlines=True)
+        stdout, stderr = p.communicate()
+        exitStatus = p.returncode
+        if exitStatus == 0:
+            success = True
+
+    except Exception:
+        # I don't even want to to start thinking how one might end up here ...
+        exitStatus = -99
+        stdout = ""
+        stderr = ""
+
+    if success:
+        # Split pdfinfo output at lines
+        outList = stdout.splitlines()
+        noLines = len(outList)
+
+        for line in outList:
+            items = line.split(":")
+            thisProperty = items[0].strip().replace(" ", "_")
+            thisValue = items[1].strip()
+            thisElt = etree.Element(thisProperty)
+            thisElt.text = thisValue
+            pdfInfoElt.append(thisElt)
+
+    return pdfInfoElt

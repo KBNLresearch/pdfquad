@@ -304,8 +304,14 @@ def processPDF(PDF):
         args.append('-list')
         args.append(PDF)
         resultPDFImages = wrappers.pdfimages(args)
+
+        args = ['pdfinfo']
+        args.append(PDF)
+        resultPDFInfo = wrappers.pdfinfo(args)
+
         # Add tool-specific elements to properties element
         propertiesElt.append(resultPDFImages)
+        propertiesElt.append(resultPDFInfo)
 
         try:
             # Start Schematron magic ...
