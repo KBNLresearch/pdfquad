@@ -11,6 +11,10 @@ def pdfimages(PDF):
     # Create Element object to hold pdfimages output
     pdfImagesElt = etree.Element("pdfimages")
 
+    # TODO:
+    # - check if pdimages exists
+    # - add wrapping of Windows executable at user-defined location (defined in config file)
+
     args = ['pdfimages']
     args.append('-list')
     args.append(PDF)
@@ -66,6 +70,10 @@ def pdfinfo(PDF):
     success = False
     # Create Element object to hold pdfinfo output
     pdfInfoElt = etree.Element("pdfinfo")
+
+    # TODO:
+    # - check if pdimages exists
+    # - add wrapping of Windows executable at user-defined location (defined in config file)
 
     args = ['pdfinfo']
     args.append(PDF)
