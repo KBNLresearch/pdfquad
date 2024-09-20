@@ -31,7 +31,6 @@ def pdfimages(PDF):
         # I don't even want to to start thinking how one might end up here ...
         exitStatus = -99
         stdout = ""
-        stderr = ""
 
     if success:
         # Split pdfimages output at lines
@@ -72,7 +71,7 @@ def pdfinfo(PDF):
     pdfInfoElt = etree.Element("pdfinfo")
 
     # TODO:
-    # - check if pdimages exists
+    # - check if pdinfo exists
     # - add wrapping of Windows executable at user-defined location (defined in config file)
 
     args = ['pdfinfo']
@@ -90,12 +89,10 @@ def pdfinfo(PDF):
         # I don't even want to to start thinking how one might end up here ...
         exitStatus = -99
         stdout = ""
-        stderr = ""
 
     if success:
         # Split pdfinfo output at lines
         outList = stdout.splitlines()
-        noLines = len(outList)
 
         for line in outList:
             items = line.split(":")
