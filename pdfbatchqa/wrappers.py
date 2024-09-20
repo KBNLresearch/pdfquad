@@ -4,12 +4,16 @@
 import subprocess as sub
 from lxml import etree
 
-def pdfimages(args):
+def pdfimages(PDF):
     """pdfimages wrapper function"""
 
     success = False
     # Create Element object to hold pdfimages output
     pdfImagesElt = etree.Element("pdfimages")
+
+    args = ['pdfimages']
+    args.append('-list')
+    args.append(PDF)
 
     try:
         p = sub.Popen(args, stdout=sub.PIPE, stderr=sub.PIPE,
@@ -56,12 +60,15 @@ def pdfimages(args):
     return pdfImagesElt
 
 
-def pdfinfo(args):
+def pdfinfo(PDF):
     """pdfinfo wrapper function"""
 
     success = False
     # Create Element object to hold pdfinfo output
     pdfInfoElt = etree.Element("pdfinfo")
+
+    args = ['pdfinfo']
+    args.append(PDF)
 
     try:
         p = sub.Popen(args, stdout=sub.PIPE, stderr=sub.PIPE,
