@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 
 """pdfbatchqa.__main__: executed when pdfbatchqa directory is called as script."""
