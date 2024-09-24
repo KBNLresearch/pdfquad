@@ -22,6 +22,7 @@ import configargparse
 import xml.etree.ElementTree as ET
 from lxml import isoschematron
 from lxml import etree
+from shutil import which
 from . import wrappers
 from . import config
 
@@ -88,8 +89,7 @@ def parseCommandLine():
     # Create parser
     ## TODO: add config file location for Windows
     parser = configargparse.ArgumentParser(description="Automated PDF Quality Assessment digitisation batches",
-                                           default_config_files=['/etc/pdfbatchqa/pdfbatchqa.conf',
-										                         '~/.config/pdfbatchqa/pdfbatchqa.conf'])
+                                           default_config_files=[config.configfile])
 
     parser.add_argument('batchDir',
                         action="store",
@@ -99,7 +99,6 @@ def parseCommandLine():
                         help="prefix of output files")
     parser.add_argument('--profile', '-p',
                         action="store",
-                        default="list",
                         help='name of profile that defines validation schemas.\
                               Type "l" or "list" to view all available profiles')
     parser.add_argument("--pdfimages",
@@ -363,6 +362,15 @@ def processPDF(PDF):
 def main():
     """Main function"""
 
+    # Path to configuration file (from https://stackoverflow.com/a/53222876/1209004)
+    configpath = os.path.join(
+    os.environ.get('APPDATA') or
+    os.environ.get('XDG_CONFIG_HOME') or
+    os.path.join(os.environ['HOME'], '.config'),
+    "pdfbatchqa")
+
+    config.configfile = os.path.join(configpath, 'pdfbatchqa.conf')
+
     # Locate package directory
     packageDir = os.path.dirname(os.path.abspath(__file__))
 
@@ -386,6 +394,14 @@ def main():
 
     config.pdfimages = args.pdfimages
     config.pdfinfo = args.pdfinfo
+
+    # Check if wrapped tools are installed
+    if which(config.pdfimages) is None:
+        msg = "pdfimages executable '" + config.pdfimages + "' doesn't exist"
+        errorExit(msg)
+    if which(config.pdfinfo) is None:
+        msg = "pdfinfo executable '" + config.pdfinfo + "' doesn't exist"
+        errorExit(msg)
 
     # Get schema locations from profile
     schemas = readProfile(profile, profilesDir, schemasDir)
