@@ -18,6 +18,7 @@ Copyright 2024, KB/National Library of the Netherlands
 import sys
 import os
 import time
+import tempfile
 import configargparse
 import xml.etree.ElementTree as ET
 from lxml import isoschematron
@@ -107,6 +108,9 @@ def parseCommandLine():
     parser.add_argument("--pdfinfo",
                         action="store",
                         help="path to pdfinfo executable")
+    parser.add_argument("--exiftool",
+                        action="store",
+                        help="path to exiftool executable")
     parser.add_argument('--version', '-v',
                         action="version",
                         version=__version__)
@@ -193,7 +197,7 @@ def getFilesFromTree(rootDir, extensionString):
             thisFile = os.path.join(dirname, filename)
             thisExtension = os.path.splitext(thisFile)[1]
             thisExtension = thisExtension.upper()
-            if extensionString in thisExtension:
+            if extensionString.strip() == '*' or extensionString in thisExtension:
                 filesList.append(thisFile)
     return filesList
 
@@ -268,6 +272,7 @@ def processPDF(PDF):
     # Create elements to store properties and Schematron report
     propertiesElt = etree.Element("properties")
     reportElt = etree.Element("schematronReport")
+    exiftoolElt = etree.Element("exiftool")
 
     # TODO Select schema based on whether this is a PDF with 50% or 85%
     # JPEG quality (from file name or path name pattern in batch?)
@@ -301,12 +306,29 @@ def processPDF(PDF):
     if schemaMatch:
 
         # Run Poppler tools on image and write result to text file
-        resultPDFImages = wrappers.pdfimages(PDF)
+        resultPDFImages = wrappers.pdfimagesList(PDF)
         resultPDFInfo = wrappers.pdfinfo(PDF)
+
+        # Extract images to temporary directory
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            successExtract = wrappers.pdfimagesExtract(PDF, tmpdirname)
+            if successExtract:
+                listImages = getFilesFromTree(tmpdirname, "*")
+                # Run Exiftool on extracted images
+                for image in listImages:
+                    exifOut = wrappers.exiftool(image)
+                    try:
+                        resultExifTool = etree.fromstring(exifOut.encode('utf-8'))
+                    except Exception:
+                        resultExifTool = etree.Element("error")
+                        resultExifTool.text = "exception while running exiftool"
+
+                    exiftoolElt.append(resultExifTool)
 
         # Add tool-specific elements to properties element
         propertiesElt.append(resultPDFImages)
         propertiesElt.append(resultPDFInfo)
+        propertiesElt.append(exiftoolElt)
 
         try:
             # Start Schematron magic ...
@@ -397,6 +419,7 @@ def main():
 
     config.pdfimages = args.pdfimages
     config.pdfinfo = args.pdfinfo
+    config.exiftool = args.exiftool
 
     # Check if wrapped tools are defined and installed
     if config.pdfimages is None:
@@ -405,13 +428,19 @@ def main():
     if config.pdfinfo is None:
         msg = "pdfinfo executable is undefined"
         errorExit(msg)
+    if config.exiftool is None:
+        msg = "exiftool executable is undefined"
+        errorExit(msg)
     if which(config.pdfimages) is None:
         msg = "pdfimages executable '" + config.pdfimages + "' doesn't exist"
         errorExit(msg)
     if which(config.pdfinfo) is None:
         msg = "pdfinfo executable '" + config.pdfinfo + "' doesn't exist"
         errorExit(msg)
-
+    if which(config.exiftool) is None:
+        msg = "exiftool executable '" + config.exiftool + "' doesn't exist"
+        errorExit(msg)
+    
     # Get schema locations from profile
     schemas = readProfile(profile, schemasDir)
 

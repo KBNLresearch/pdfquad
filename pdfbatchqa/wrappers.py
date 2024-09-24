@@ -1,12 +1,13 @@
 #! /usr/bin/env python3
 """wrapper functions for poppler"""
 
+import os
 import subprocess as sub
 from lxml import etree
 from . import config
 
-def pdfimages(PDF):
-    """pdfimages wrapper function"""
+def pdfimagesList(PDF):
+    """pdfimages list wrapper function"""
 
     success = False
     # Create Element object to hold pdfimages output
@@ -64,6 +65,30 @@ def pdfimages(PDF):
     return pdfImagesElt
 
 
+def pdfimagesExtract(PDF, outDir):
+    """pdfimages extract wrapper function"""
+
+    success = False
+
+    args = [config.pdfimages]
+    args.append('-all')
+    args.append(PDF)
+    args.append(os.path.join(outDir, 'crap'))
+
+    try:
+        p = sub.Popen(args, stdout=sub.PIPE, stderr=sub.PIPE,
+                      shell=False, bufsize=1, universal_newlines=True)
+        stdout, stderr = p.communicate()
+        exitStatus = p.returncode
+        if exitStatus == 0:
+            success = True
+
+    except Exception:
+        pass
+
+    return success
+
+
 def pdfinfo(PDF):
     """pdfinfo wrapper function"""
 
@@ -104,3 +129,28 @@ def pdfinfo(PDF):
             pdfInfoElt.append(thisElt)
 
     return pdfInfoElt
+
+
+def exiftool(imagefile):
+    """exiftool wrapper function"""
+
+    success = False
+
+    args = [config.exiftool]
+    args.append('-X')
+    args.append(imagefile)
+
+    try:
+        p = sub.Popen(args, stdout=sub.PIPE, stderr=sub.PIPE,
+                      shell=False, bufsize=1, universal_newlines=True)
+        stdout, stderr = p.communicate()
+        exitStatus = p.returncode
+        if exitStatus == 0:
+            success = True
+
+    except Exception:
+        # I don't even want to to start thinking how one might end up here ...
+        exitStatus = -99
+        stdout = ""
+
+    return stdout
