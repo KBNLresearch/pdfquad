@@ -23,13 +23,13 @@ pip install pdfbatchqa --user
 To install *pdfbatchqa* for *all* users, use the following command:
 
 ```
-pip install jprofile
+pip install pdfbatchqa
 ```
 
 You need local admin (Windows) / superuser (Linux) privilige to do this. On Windows, you can do this by running the above command in a Command Prompt window that was opened as Administrator. On Linux, use this:
 
 ```
-sudo pip install jprofile
+sudo pip install pdfbatchqa
 ```
 
 ## Command-line syntax

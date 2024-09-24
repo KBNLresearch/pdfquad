@@ -18,7 +18,7 @@ Copyright 2024, KB/National Library of the Netherlands
 import sys
 import os
 import time
-import argparse
+import configargparse
 import xml.etree.ElementTree as ET
 from lxml import isoschematron
 from lxml import etree
@@ -86,21 +86,28 @@ def parseCommandLine():
     """Parse command line"""
 
     # Create parser
-    parser = argparse.ArgumentParser(description="JP2 profiler for KB")
+    ## TODO: add config file location for Windows
+    parser = configargparse.ArgumentParser(description="Automated PDF Quality Assessment digitisation batches",
+                                           default_config_files=['/etc/pdfbatchqa/pdfbatchqa.conf',
+										                         '~/.config/pdfbatchqa/pdfbatchqa.conf'])
 
     parser.add_argument('batchDir',
                         action="store",
                         help="batch directory")
-
     parser.add_argument('prefixOut',
                         action="store",
                         help="prefix of output files")
-    parser.add_argument('-p', '--profile',
+    parser.add_argument('--profile', '-p',
                         action="store",
                         default="list",
-                        help='name of profile that defines schemas for master,\
-                               access and target images. Type "l" or "list" \
-                              to view all available profiles')
+                        help='name of profile that defines validation schemas.\
+                              Type "l" or "list" to view all available profiles')
+    parser.add_argument("--pdfimages",
+                        action="store",
+                        help="path to pdfimages executable")
+    parser.add_argument("--pdfinfo",
+                        action="store",
+                        help="path to pdfinfo executable")
     parser.add_argument('--version', '-v',
                         action="version",
                         version=__version__)
@@ -376,6 +383,9 @@ def main():
     profile = args.profile
     if profile in["l", "list"]:
         listProfiles(profilesDir)
+
+    config.pdfimages = args.pdfimages
+    config.pdfinfo = args.pdfinfo
 
     # Get schema locations from profile
     schemas = readProfile(profile, profilesDir, schemasDir)

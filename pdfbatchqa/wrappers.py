@@ -3,6 +3,7 @@
 
 import subprocess as sub
 from lxml import etree
+from . import config
 
 def pdfimages(PDF):
     """pdfimages wrapper function"""
@@ -15,7 +16,7 @@ def pdfimages(PDF):
     # - check if pdimages exists
     # - add wrapping of Windows executable at user-defined location (defined in config file)
 
-    args = ['pdfimages']
+    args = [config.pdfimages]
     args.append('-list')
     args.append(PDF)
 
@@ -74,7 +75,7 @@ def pdfinfo(PDF):
     # - check if pdinfo exists
     # - add wrapping of Windows executable at user-defined location (defined in config file)
 
-    args = ['pdfinfo']
+    args = [config.pdfinfo]
     args.append(PDF)
 
     try:
