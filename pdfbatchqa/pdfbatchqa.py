@@ -129,13 +129,8 @@ def listProfiles(profilesDir):
     sys.exit()
 
 
-def readProfile(profile, profilesDir, schemasDir):
+def readProfile(profile, schemasDir):
     """Read a profile and return dictionary with all associated schemas"""
-
-    profile = os.path.join(profilesDir, profile)
-
-    # Check if profile exists and exit if not
-    checkFileExists(profile)
 
     # Parse XML tree
     try:
@@ -362,9 +357,11 @@ def processPDF(PDF):
 def main():
     """Main function"""
 
-    # Path to configuration file (from https://stackoverflow.com/a/53222876/1209004)
+    # Path to configuration file (from https://stackoverflow.com/a/53222876/1209004
+    # and https://stackoverflow.com/a/13184486/1209004).
+    # TODO on Windows this should return the AppData/Local folder, does this work??
     configpath = os.path.join(
-    os.environ.get('APPDATA') or
+    os.environ.get('LOCALAPPDATA') or
     os.environ.get('XDG_CONFIG_HOME') or
     os.path.join(os.environ['HOME'], '.config'),
     "pdfbatchqa")
@@ -391,11 +388,23 @@ def main():
     profile = args.profile
     if profile in["l", "list"]:
         listProfiles(profilesDir)
+    elif profile is None:
+        msg = "profile is undefined"
+        errorExit(msg)
+    else:
+        profile = os.path.join(profilesDir, profile)
+        checkFileExists(profile)
 
     config.pdfimages = args.pdfimages
     config.pdfinfo = args.pdfinfo
 
-    # Check if wrapped tools are installed
+    # Check if wrapped tools are defined and installed
+    if config.pdfimages is None:
+        msg = "pdfimages executable is undefined"
+        errorExit(msg)
+    if config.pdfinfo is None:
+        msg = "pdfinfo executable is undefined"
+        errorExit(msg)
     if which(config.pdfimages) is None:
         msg = "pdfimages executable '" + config.pdfimages + "' doesn't exist"
         errorExit(msg)
@@ -404,7 +413,7 @@ def main():
         errorExit(msg)
 
     # Get schema locations from profile
-    schemas = readProfile(profile, profilesDir, schemasDir)
+    schemas = readProfile(profile, schemasDir)
 
     schemaLowQuality = schemas["schemaLowQuality"]
     schemaHighQuality = schemas["schemaHighQuality"]

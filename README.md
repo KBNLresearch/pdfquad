@@ -35,19 +35,48 @@ sudo pip install pdfbatchqa
 ## Command-line syntax
 
 ```
-usage: pdfbatchqa batchDir prefixOut -p PROFILE
+usage: pdfbatchqa [-h] [--profile PROFILE] [--pdfimages PDFIMAGES]
+              [--pdfinfo PDFINFO] [--version]
+              batchDir prefixOut
 ```
 
-## Positional arguments
+### Positional arguments
 
 **batchDir**: root directory of batch
 
 **prefixOut**: prefix that is used for writing output files
 
-**PROFILE**: name of profile that defines the validation schemas
+### Optional arguments
 
-To list all available profiles, use a value of *l* or *list* for *PROFILE*.
+**--profile**: name of profile that defines the validation schemas (to list all available profiles, use a value of *l* or *list* for *PROFILE*).
 
+**--pdfimages**: path to *pdfimages* executable
+
+**--pdfinfo**: path to *pdfiinfo* executable
+
+## Configuration
+
+If the *--profile*, *--pdfimages* and *--pdfinfo* options are not set, *pdfbatchqa* will use the values that are defined in a configuration file. Depending on the OS used, *pdfbatchqa* expects this configuration file at the following locations:
+
+- `~/.config/pdfbatchqa/pdfbatchqa.conf` (Linux)
+- ` C:\Users\<username>\AppData\Local\pdfbatchqa\pdfbatchqa.conf` (Windows)
+
+For Linux, the file should look like this:
+
+```
+# settings pdfbatchqa
+profile = dbnl-fulltext.xml
+pdfimages = pdfimages # pdfimages executable
+pdfinfo = pdfinfo # pdfinfo executable
+```
+And here for Windows (TODO: check paths, which depend on specific packages used):
+
+```
+# settings pdfbatchqa
+profile = dbnl-fulltext.xml
+pdfimages = C:\poppler-24.07.0\Library\bin\pdfimages.exe # pdfimages executable
+pdfinfo = C:\poppler-24.07.0\Library\bin\pdfinfo.exe # pdfinfo executable
+```
 
 ## Batch structure
 
