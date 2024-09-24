@@ -32,6 +32,47 @@ You need local admin (Windows) / superuser (Linux) privilige to do this. On Wind
 sudo pip install pdfbatchqa
 ```
 
+## Configuration
+
+The software relies on a configuration file ("pdfbatchqa.conf"), which defines the ful paths of the wrapped tools, as well as the default values of some options. You need to create this file yourself!
+
+### Linux
+
+On a Linux system, *pdfbatchqa* expects the configuration file at the following location:
+
+```
+~/.config/pdfbatchqa/pdfbatchqa.conf
+```
+
+Just create an empty text file at the above location with your preferred text editor, and then paste in the text below:
+
+```
+# settings pdfbatchqa
+profile = dbnl-fulltext.xml
+pdfimages = pdfimages # pdfimages executable
+pdfinfo = pdfinfo # pdfinfo executable
+```
+Then save the file. Done!
+
+### Windows
+
+On Windows, *pdfbatchqa* expects the configuration file at:
+
+```
+C:\Users\<username>\AppData\Local\pdfbatchqa\pdfbatchqa.conf
+```
+
+Just create an empty text file at the above location with your preferred text editor, and then paste in the text below (note: you may need to modify the pdfimages and pdfinfo paths according to the specific version and installation location on your system):
+
+```
+# settings pdfbatchqa
+profile = dbnl-fulltext.xml
+pdfimages = C:\poppler-24.07.0\Library\bin\pdfimages.exe # pdfimages executable
+pdfinfo = C:\poppler-24.07.0\Library\bin\pdfinfo.exe # pdfinfo executable
+```
+
+Then save the file. Done!
+
 ## Command-line syntax
 
 ```
@@ -52,31 +93,9 @@ usage: pdfbatchqa [-h] [--profile PROFILE] [--pdfimages PDFIMAGES]
 
 **--pdfimages**: path to *pdfimages* executable
 
-**--pdfinfo**: path to *pdfiinfo* executable
+**--pdfinfo**: path to *pdfinfo* executable
 
-## Configuration
-
-If the *--profile*, *--pdfimages* and *--pdfinfo* options are not set, *pdfbatchqa* will use the values that are defined in a configuration file. Depending on the OS used, *pdfbatchqa* expects this configuration file at the following locations:
-
-- `~/.config/pdfbatchqa/pdfbatchqa.conf` (Linux)
-- ` C:\Users\<username>\AppData\Local\pdfbatchqa\pdfbatchqa.conf` (Windows)
-
-For Linux, the file should look like this:
-
-```
-# settings pdfbatchqa
-profile = dbnl-fulltext.xml
-pdfimages = pdfimages # pdfimages executable
-pdfinfo = pdfinfo # pdfinfo executable
-```
-And here for Windows (TODO: check paths, which depend on specific packages used):
-
-```
-# settings pdfbatchqa
-profile = dbnl-fulltext.xml
-pdfimages = C:\poppler-24.07.0\Library\bin\pdfimages.exe # pdfimages executable
-pdfinfo = C:\poppler-24.07.0\Library\bin\pdfinfo.exe # pdfinfo executable
-```
+If the *--profile*, *--pdfimages* and *--pdfinfo* options are not set, *pdfbatchqa* will use the values that are defined in the configuration file. 
 
 ## Batch structure
 
