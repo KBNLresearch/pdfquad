@@ -19,7 +19,7 @@ def find_version(*file_paths):
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
-INSTALL_REQUIRES = ['setuptools', 'lxml']
+INSTALL_REQUIRES = ['setuptools', 'lxml', 'ConfigArgParse']
 PYTHON_REQUIRES = '>=3.2, <4'
 
 README = open('README.md', 'r')
