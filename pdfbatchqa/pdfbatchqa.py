@@ -25,6 +25,7 @@ from lxml import isoschematron
 from lxml import etree
 from shutil import which
 from . import wrappers
+from . import writeconfig
 from . import config
 
 __version__ = "0.1.0"
@@ -95,10 +96,10 @@ def parseCommandLine():
     parser.add_argument('batchDir',
                         action="store",
                         help="batch directory")
-    parser.add_argument('prefixOut',
+    parser.add_argument('--prefixout',
                         action="store",
                         help="prefix of output files")
-    parser.add_argument('--profile', '-p',
+    parser.add_argument('--profile',
                         action="store",
                         help='name of profile that defines validation schemas.\
                               Type "l" or "list" to view all available profiles')
@@ -390,6 +391,10 @@ def main():
 
     config.configfile = os.path.join(configpath, 'pdfbatchqa.conf')
 
+    # Create config directory + file if it doesn't exist already
+    if not os.path.isfile(config.configfile):
+        writeconfig.writeConfigFile(config.configfile)
+   
     # Locate package directory
     packageDir = os.path.dirname(os.path.abspath(__file__))
 
@@ -404,7 +409,7 @@ def main():
     args = parseCommandLine()
 
     batchDir = args.batchDir
-    prefixOut = args.prefixOut
+    prefixOut = args.prefixout
     fileOut = prefixOut + ".xml"
 
     profile = args.profile
