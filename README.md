@@ -4,6 +4,29 @@
 
 *Pdfbatchqa* is a simple tool for automated checking of digitisation batches of *PDF* files against a user-defined technical profile. Internally it wraps around the *pdfimages* tool from the [*Poppler*](https://en.wikipedia.org/wiki/Poppler_(software)) library, which is used to extract the image-related properties for each PDF. The *pdfimages* output is then validated against a set of [*Schematron*](http://en.wikipedia.org/wiki/Schematron) schemas that define the required technical characteristics.
 
+## Dependencies
+
+Internally the software wraps around the following tools, which have to be installed first.
+
+### Poppler-utils
+
+On Linux (Ubuntu/Debian), you can install these using:
+
+```
+sudo apt install poppler-utils
+```
+
+On Windows, download and install compiled binaries that are available here (TODO: add link + instructions).
+
+### ExifTool
+
+On Linux (Ubuntu/Debian), install using:
+
+```
+sudo apt install libimage-exiftool-perl
+```
+
+On Windows, download the latest 64-bit Windows binaries from the [ExifTool website](https://exiftool.org/). Extract the contents of the ZIP file to a new directory (e.g. `C:\exiftool\`), and rename the file `exiftool(-k).exe` to `exiftool.exe`.
 
 ## Installation
 
