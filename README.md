@@ -72,7 +72,7 @@ By default it looks like this:
 profile = dbnl-fulltext.xml
 prefix = pdfbatchqa
 pdfimages = C:\poppler-24.07.0\Library\bin\pdfimages.exe # pdfimages executable # pdfimages executable
-pdfinfo = C:\poppler-24.07.0\Library\\bin\pdfinfo.exe # pdfinfo executable
+pdfinfo = C:\poppler-24.07.0\Library\bin\pdfinfo.exe # pdfinfo executable
 exiftool = C:\exiftool\exiftool.exe # exiftool executable
 ```
 
