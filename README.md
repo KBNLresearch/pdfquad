@@ -193,12 +193,6 @@ Available profiles:
 dbnl-fulltext.xml
 ```
 
-### Analyse batch
-
-```
-pdfbatchqa -p dbnl-fulltext.xml d:\myBatch mybatch
-```
-
 TODO: update remaining documentation.
 
 <!--
