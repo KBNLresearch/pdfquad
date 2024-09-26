@@ -265,15 +265,6 @@ def processPDF(PDF):
 
     # Create output element for this PDF
     pdfElt = etree.Element("file")
-    fPathElt = etree.Element("filePath")
-    fPathElt.text = PDF
-    fSizeElt = etree.Element("fileSize")
-    fSizeElt.text = str(os.path.getsize(PDF))
-
-    # Create elements to store properties and Schematron report
-    propertiesElt = etree.Element("properties")
-    reportElt = etree.Element("schematronReport")
-    exiftoolElt = etree.Element("exiftool")
 
     # Select schema based on whether this is a PDF with 50% or 85%
     # JPEG quality (from path name pattern in batch)
@@ -290,6 +281,17 @@ def processPDF(PDF):
         ptOutString += description + config.lineSep
 
     if schemaMatch:
+
+        # Create and fill descriptive elements
+        fPathElt = etree.Element("filePath")
+        fPathElt.text = PDF
+        fSizeElt = etree.Element("fileSize")
+        fSizeElt.text = str(os.path.getsize(PDF))
+
+        # Create elements to store properties and Schematron report
+        propertiesElt = etree.Element("properties")
+        reportElt = etree.Element("schematronReport")
+        exiftoolElt = etree.Element("exiftool")
 
         # Run Poppler tools on image and write result to text file
         resultPDFImages = wrappers.pdfimagesList(PDF)
