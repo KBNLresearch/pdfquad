@@ -275,34 +275,19 @@ def processPDF(PDF):
     reportElt = etree.Element("schematronReport")
     exiftoolElt = etree.Element("exiftool")
 
-    # TODO Select schema based on whether this is a PDF with 50% or 85%
-    # JPEG quality (from file name or path name pattern in batch?)
-
-    """
-    if "master" in pathComponents:
-        mySchema = config.schemaMasterLXMLElt
-    elif "access" in pathComponents:
-        mySchema = config.schemaAccessLXMLElt
-    elif "targets-jp2_access" in pathComponents:
-        if "_MTF_GRAY_" in fName:
-            mySchema = config.schemaTargetAccessGrayLXMLElt
-        else:
-            mySchema = config.schemaTargetAccessRGBLXMLElt
-    elif "targets-jp2" in pathComponents:
-        if "_MTF_GRAY_" in fName:
-            mySchema = config.schemaTargetGrayLXMLElt
-        else:
-            mySchema = config.schemaTargetRGBLXMLElt
+    # Select schema based on whether this is a PDF with 50% or 85%
+    # JPEG quality (from path name pattern in batch)
+    if "300ppi-50" in pathComponents:
+        mySchema = config.schemaLowQualityLXMLElt
+        schemaMatch = True
+    elif "300ppi-85" in pathComponents:
+        mySchema = config.schemaHighQualityLXMLElt
+        schemaMatch = True
     else:
         schemaMatch = False
         config.status = "fail"
         description = "Name of parent directory does not match any schema"
         ptOutString += description + config.lineSep
-    """
-
-    # For now we just use this schema
-    mySchema = config.schemaLowQualityLXMLElt
-    schemaMatch = True
 
     if schemaMatch:
 
