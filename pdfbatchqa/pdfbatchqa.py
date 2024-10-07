@@ -19,10 +19,10 @@ import sys
 import os
 import time
 import tempfile
+from shutil import which
 import configargparse
 from lxml import isoschematron
 from lxml import etree
-from shutil import which
 from . import wrappers
 from . import writeconfig
 from . import config
