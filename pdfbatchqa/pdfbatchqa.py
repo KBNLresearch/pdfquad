@@ -20,7 +20,6 @@ import os
 import time
 import tempfile
 import configargparse
-import xml.etree.ElementTree as ET
 from lxml import isoschematron
 from lxml import etree
 from shutil import which
@@ -139,7 +138,7 @@ def readProfile(profile, schemasDir):
 
     # Parse XML tree
     try:
-        tree = ET.parse(profile)
+        tree = etree.parse(profile)
         prof = tree.getroot()
     except Exception:
         msg = "error parsing " + profile
