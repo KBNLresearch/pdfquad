@@ -297,7 +297,20 @@ def processPDF(PDF):
         # Parse PDF
         doc = pymupdf.open(PDF)
 
+        # Read pageMode value from document catalog (if it exists)
+        # This is needed for the thumbnail check!
+        catXref = doc.pdf_catalog()
+        pageMode = doc.xref_get_key(catXref, "PageMode")
+        pageModeElt = etree.Element("PageMode")
+        if pageMode[0] == 'null':
+            pageModeElt.text = "undefined"
+        else:
+            pageModeElt.text = pageMode[1]
+
+        pages = 0
+
         for page in doc:
+            pages  += 1
             pageElt = etree.Element("page")
             images = page.get_images(full=False)
             for image in images:
@@ -364,6 +377,12 @@ def processPDF(PDF):
 
             # Add page element to properties element
             propertiesElt.append(pageElt)
+
+        # Add page mode value and number of pages
+        propertiesElt.append(pageModeElt)
+        noPagesElt = etree.Element("noPages")
+        noPagesElt.text = str(pages)
+        propertiesElt.append(noPagesElt)
 
         try:
             # Start Schematron magic ...

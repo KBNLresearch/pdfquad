@@ -1,13 +1,28 @@
 import io
+from pprint import pprint
 from PIL import Image
 from PIL import ImageCms
 import pymupdf
 
-myPDF = "/home/johan/test/kort004mult/300ppi-50/kort004mult01_01_50.pdf"
+#myPDF = "/home/johan/test/kort004mult/300ppi-50/kort004mult01_01_50.pdf"
+myPDF = "/home/johan/test/BKT-ecur/BKT-ecur002glas01_01.pdf"
 
 doc = pymupdf.open(myPDF)
 
+catXref = doc.pdf_catalog()  # get xref of the /Catalog
+
+catDict = doc.xref_get_keys(catXref)
+
+typeValue = doc.xref_get_key(catXref, 'Type')
+pageMode = doc.xref_get_key(catXref, 'PageMode')
+
+print(typeValue)
+print(pageMode)
+
+pages = 0
+
 for page in doc:
+    pages +=1
     images = page.get_images(full=False)
     for image in images:
         # Store PDF object level properties to dictionary
@@ -60,6 +75,7 @@ for page in doc:
         except KeyError:
             pass
 
-        print(propsPDF)
-        print(propsStream)
+        #print(propsPDF)
+        #print(propsStream)
+        #print(str(pages))
 
