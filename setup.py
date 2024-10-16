@@ -23,7 +23,7 @@ INSTALL_REQUIRES = ['setuptools',
                     'lxml', 
                     'ConfigArgParse',
                     'pillow',
-                    'pypdf']
+                    'pymupdf']
 PYTHON_REQUIRES = '>=3.8, <4'
 
 README = open('README.md', 'r')
