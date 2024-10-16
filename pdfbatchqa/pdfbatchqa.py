@@ -17,14 +17,14 @@ Copyright 2024, KB/National Library of the Netherlands
 
 import sys
 import os
+import io
 import time
-import tempfile
-from shutil import which
 import configargparse
 from lxml import isoschematron
 from lxml import etree
-import pypdf
-from . import wrappers
+import pymupdf
+from PIL import Image
+from PIL import ImageCms
 from . import writeconfig
 from . import config
 
@@ -103,15 +103,6 @@ def parseCommandLine():
                         action="store",
                         help='name of profile that defines validation schemas.\
                               Type "l" or "list" to view all available profiles')
-    parser.add_argument("--pdfimages",
-                        action="store",
-                        help="path to pdfimages executable")
-    parser.add_argument("--pdfinfo",
-                        action="store",
-                        help="path to pdfinfo executable")
-    parser.add_argument("--exiftool",
-                        action="store",
-                        help="path to exiftool executable")
     parser.add_argument('--version', '-v',
                         action="version",
                         version=__version__)
@@ -250,6 +241,16 @@ def extractSchematron(report):
     return outString
 
 
+def dictionaryToElt(name, dictionary):
+    """Create Element object from dictionary"""
+    elt = etree.Element(name)
+    for key, value in dictionary.items():
+        child = etree.Element(key)
+        child.text = str(value)
+        elt.append(child)
+    return elt
+
+
 def processPDF(PDF):
     """Process one PDF"""
 
@@ -293,30 +294,76 @@ def processPDF(PDF):
         reportElt = etree.Element("schematronReport")
         exiftoolElt = etree.Element("exiftool")
 
-        # Run Poppler tools on image and write result to text file
-        resultPDFImages = wrappers.pdfimagesList(PDF)
-        resultPDFInfo = wrappers.pdfinfo(PDF)
+        # Parse PDF
+        doc = pymupdf.open(PDF)
 
-        # Extract images to temporary directory
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            successExtract = wrappers.pdfimagesExtract(PDF, tmpdirname)
-            if successExtract:
-                listImages = getFilesFromTree(tmpdirname, "*")
-                # Run Exiftool on extracted images
-                for image in listImages:
-                    exifOut = wrappers.exiftool(image)
-                    try:
-                        resultExifTool = etree.fromstring(exifOut.encode('utf-8'))
-                    except Exception:
-                        resultExifTool = etree.Element("error")
-                        resultExifTool.text = "exception while running exiftool"
+        for page in doc:
+            pageElt = etree.Element("page")
+            images = page.get_images(full=False)
+            for image in images:
+                imageElt = etree.Element("image")
+                # Store PDF object level properties to dictionary
+                propsPDF = {}
+                propsPDF['xref'] = image[0]
+                #propsPDF['smask'] = image[1]
+                propsPDF['width'] = image[2]
+                propsPDF['height'] = image[3]
+                propsPDF['bpc'] = image[4]
+                propsPDF['colorspace'] = image[5]
+                propsPDF['altcolorspace'] = image[6]
+                #propsPDF['name'] = image[7]
+                propsPDF['filter'] = image[8]
 
-                    exiftoolElt.append(resultExifTool)
+                # Read raw image stream data from xref id
+                xref = propsPDF['xref']
+                stream = doc.xref_stream_raw(xref)
 
-        # Add tool-specific elements to properties element
-        propertiesElt.append(resultPDFImages)
-        propertiesElt.append(resultPDFInfo)
-        propertiesElt.append(exiftoolElt)
+                with open('test.dat', 'wb') as fOut:
+                    fOut.write(stream)
+
+                im = Image.open(io.BytesIO(stream))
+                im.load()
+                propsStream = {}
+                propsStream['format'] = im.format
+                propsStream['width'] = im.size[0]
+                propsStream['height'] = im.size[1]
+                propsStream['mode'] = im.mode
+                for key, value in im.info.items():
+                    if isinstance(value, bytes):
+                        propsStream[key] = 'bytes'
+                    elif key == 'dpi' and isinstance(value, tuple):
+                        propsStream['ppi_x'] = value[0]
+                        propsStream['ppi_y'] = value[1]
+                    elif key == 'jfif_density' and isinstance(value, tuple):
+                        propsStream['jfif_density_x'] = value[0]
+                        propsStream['jfif_density_y'] = value[1]
+                    elif isinstance(value, tuple):
+                        # Skip any other properties that return tuples
+                        pass
+                    else:
+                        propsStream[key] = value
+
+                try:
+                    # ICC profile name and description
+                    icc = im.info['icc_profile']
+                    iccProfile = ImageCms.ImageCmsProfile(io.BytesIO(icc))
+                    propsStream['icc_profile_name'] = ImageCms.getProfileName(iccProfile).strip()
+                    propsStream['icc_profile_description'] = ImageCms.getProfileDescription(iccProfile).strip()
+                except KeyError:
+                    pass
+                
+                # Dictionaries to element objects
+                propsPDFElt = dictionaryToElt('pdf', propsPDF)
+                propsStreamElt = dictionaryToElt('stream', propsStream)
+                # Add properties to image element
+                imageElt.append(propsPDFElt)
+                imageElt.append(propsStreamElt)
+
+                # Add image element to page element
+                pageElt.append(imageElt)
+
+            # Add page element to properties element
+            propertiesElt.append(pageElt)
 
         try:
             # Start Schematron magic ...
@@ -408,30 +455,6 @@ def main():
     else:
         profile = os.path.join(profilesDir, profile)
         checkFileExists(profile)
-
-    config.pdfimages = args.pdfimages
-    config.pdfinfo = args.pdfinfo
-    config.exiftool = args.exiftool
-
-    # Check if wrapped tools are defined and installed
-    if config.pdfimages is None:
-        msg = "pdfimages executable is undefined"
-        errorExit(msg)
-    if config.pdfinfo is None:
-        msg = "pdfinfo executable is undefined"
-        errorExit(msg)
-    if config.exiftool is None:
-        msg = "exiftool executable is undefined"
-        errorExit(msg)
-    if which(config.pdfimages) is None:
-        msg = "pdfimages executable '" + config.pdfimages + "' doesn't exist"
-        errorExit(msg)
-    if which(config.pdfinfo) is None:
-        msg = "pdfinfo executable '" + config.pdfinfo + "' doesn't exist"
-        errorExit(msg)
-    if which(config.exiftool) is None:
-        msg = "exiftool executable '" + config.exiftool + "' doesn't exist"
-        errorExit(msg)
     
     # Get schema locations from profile
     schemas = readProfile(profile, schemasDir)
