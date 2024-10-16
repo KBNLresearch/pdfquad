@@ -23,6 +23,7 @@ from shutil import which
 import configargparse
 from lxml import isoschematron
 from lxml import etree
+import pypdf
 from . import wrappers
 from . import writeconfig
 from . import config
