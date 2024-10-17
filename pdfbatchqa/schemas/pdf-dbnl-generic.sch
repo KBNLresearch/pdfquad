@@ -9,6 +9,12 @@
 <s:pattern>
     <s:title>Tests op eigenschappen</s:title>
 
+    <!-- Tests op niveau PDF metadata -->
+    <s:rule context="/properties/meta">
+        <s:assert test="(format = 'PDF 1.7')">PDF versie is niet 1.7</s:assert>
+        <s:assert test="(encryption = 'None')">PDF gebruikt versleuteling</s:assert>
+    </s:rule>
+
     <!-- Tests op niveau PDF object -->
     <s:rule context="/properties/pages/page/image/pdf">
         <s:assert test="(filter = 'DCTDecode')">waarde filter is niet DCTDecode</s:assert>
@@ -22,8 +28,7 @@
         <s:assert test="(jfif_density_y &gt; 299) and
         (jfif_density_y &lt; 301)">verticale resolutie niet binnen marges</s:assert>
         <s:assert test="(components = '3')">verkeerd aantal kleurkanalen</s:assert>
-        <s:assert test="(domponents = '3')">verkeerd aantal pleurkanalen</s:assert>
-    </s:rule>
+      </s:rule>
 
     <!-- Tests op gecombineerde niveaus PDF object en image stream -->
     <s:rule context="/properties/pages/page/image">

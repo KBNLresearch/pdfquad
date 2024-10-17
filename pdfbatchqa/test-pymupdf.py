@@ -1,21 +1,30 @@
+import sys
 import io
 from PIL import Image
 from PIL import ImageCms
 import pymupdf
 
 #myPDF = "/home/johan/test/kort004mult/300ppi-50/kort004mult01_01_50.pdf"
-myPDF = "/home/johan/test/BKT-ecur/BKT-ecur002glas01_01.pdf"
+#myPDF = "/home/johan/test/BKT-ecur/BKT-ecur002glas01_01.pdf"
+myPDF = "/home/johan/test/encryptie/300ppi-50/encryption_openpassword.pdf"
 
-doc = pymupdf.open(myPDF)
+print("opening")
+try:
+    doc = pymupdf.open(myPDF)
+except Exception:
+    print("mupdf error")
+    sys.exit()
+print("opened")
 
-encrypted = doc.is_encrypted
-
+# Page count
+pages = doc.page_count
+print("no of pages is " + str(pages))
 meta = doc.metadata
-
-version = doc.page_count
-versionCount = doc.version_count
+print("metad")
 
 print(meta)
+
+
 
 catXref = doc.pdf_catalog()  # get xref of the /Catalog
 
@@ -28,9 +37,10 @@ print(typeValue)
 print(pageMode)
 
 pages = 0
-
+"""
 for page in doc:
     pages +=1
+    print(str(page))
     images = page.get_images(full=False)
     for image in images:
         # Store PDF object level properties to dictionary
@@ -86,4 +96,4 @@ for page in doc:
         #print(propsPDF)
         #print(propsStream)
         #print(str(pages))
-
+"""

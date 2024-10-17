@@ -302,12 +302,10 @@ def processPDF(PDF):
         metadata = doc.metadata
         metadataElt = dictionaryToElt('meta', metadata)
 
-        # Read pageMode and Version values from document catalog (if they exist)
-        # pageMode is needed for the thumbnail check!
+        # Read pageMode from document catalog (if it exists)
+        # pageMode is needed for the thumbnail check
         catXref = doc.pdf_catalog()
         pageMode = doc.xref_get_key(catXref, "PageMode")
-        pdfVersionCatalog = doc.xref_get_key(catXref, "Version")
-        print(pdfVersionCatalog)
         pageModeElt = etree.Element("PageMode")
         if pageMode[0] == 'null':
             pageModeElt.text = "undefined"
