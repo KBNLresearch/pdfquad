@@ -264,9 +264,6 @@ def processPDF(PDF):
     # Create list that contains all file path components (dir names)
     pathComponents, fName = getPathComponentsAsList(PDF)
 
-    # Create output element for this PDF
-    pdfElt = etree.Element("file")
-
     # Select schema based on whether this is a PDF with 50% or 85%
     # JPEG quality (from path name pattern in batch)
     if "300ppi-50" in pathComponents:
@@ -283,6 +280,9 @@ def processPDF(PDF):
 
     if schemaMatch:
 
+        # Create output element for this PDF
+        pdfElt = etree.Element("file")
+
         # Create and fill descriptive elements
         fPathElt = etree.Element("filePath")
         fPathElt.text = PDF
@@ -292,7 +292,6 @@ def processPDF(PDF):
         # Create elements to store properties and Schematron report
         propertiesElt = etree.Element("properties")
         reportElt = etree.Element("schematronReport")
-        exiftoolElt = etree.Element("exiftool")
 
         # Parse PDF
         doc = pymupdf.open(PDF)
@@ -306,6 +305,9 @@ def processPDF(PDF):
             pageModeElt.text = "undefined"
         else:
             pageModeElt.text = pageMode[1]
+
+        # Wrapper element for pages output
+        pagesElt = etree.Element("pages")
 
         pages = 0
 
@@ -375,14 +377,17 @@ def processPDF(PDF):
                 # Add image element to page element
                 pageElt.append(imageElt)
 
-            # Add page element to properties element
-            propertiesElt.append(pageElt)
+            # Add page element to pages element
+            pagesElt.append(pageElt)
 
-        # Add page mode value and number of pages
+        # Add all child elements to properties element
+        propertiesElt.append(fPathElt)
+        propertiesElt.append(fSizeElt)
         propertiesElt.append(pageModeElt)
         noPagesElt = etree.Element("noPages")
         noPagesElt.text = str(pages)
         propertiesElt.append(noPagesElt)
+        propertiesElt.append(pagesElt)
 
         try:
             # Start Schematron magic ...
@@ -402,8 +407,6 @@ def processPDF(PDF):
         report = etree.fromstring(str(report))
         reportElt.append(report)
         # Add all child elements to PDF element
-        pdfElt.append(fPathElt)
-        pdfElt.append(fSizeElt)
         pdfElt.append(propertiesElt)
         pdfElt.append(reportElt)
 
@@ -518,15 +521,16 @@ def main():
     for myPDF in listPDFs:
         myPDF = os.path.abspath(myPDF)
         pdfResult = processPDF(myPDF)
-        # Convert output to XML and add to output file
-        outXML = etree.tostring(pdfResult,
-                                method='xml',
-                                encoding='utf-8',
-                                xml_declaration=False,
-                                pretty_print=True)
+        if isinstance(pdfResult, etree._Element):
+            # Convert output to XML and add to output file
+            outXML = etree.tostring(pdfResult,
+                                    method='xml',
+                                    encoding='utf-8',
+                                    xml_declaration=False,
+                                    pretty_print=True)
 
-        with open(fileOut,"ab") as f:
-            f.write(outXML)
+            with open(fileOut,"ab") as f:
+                f.write(outXML)
 
     # Write XML footer
     xmlFoot = "</pdfbatchqa>\n"
