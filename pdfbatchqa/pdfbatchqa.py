@@ -295,11 +295,14 @@ def processPDF(PDF):
 
         # Parse PDF
         doc = pymupdf.open(PDF)
+        pages = doc.page_count
 
-        # Read pageMode value from document catalog (if it exists)
-        # This is needed for the thumbnail check!
+        # Read pageMode and Version values from document catalog (if they exist)
+        # pageMode is needed for the thumbnail check!
         catXref = doc.pdf_catalog()
         pageMode = doc.xref_get_key(catXref, "PageMode")
+        pdfVersionCatalog = doc.xref_get_key(catXref, "Version")
+        print(pdfVersionCatalog)
         pageModeElt = etree.Element("PageMode")
         if pageMode[0] == 'null':
             pageModeElt.text = "undefined"
@@ -309,10 +312,7 @@ def processPDF(PDF):
         # Wrapper element for pages output
         pagesElt = etree.Element("pages")
 
-        pages = 0
-
         for page in doc:
-            pages  += 1
             pageElt = etree.Element("page")
             images = page.get_images(full=False)
             for image in images:

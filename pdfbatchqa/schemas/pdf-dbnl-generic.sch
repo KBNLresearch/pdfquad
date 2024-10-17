@@ -21,6 +21,8 @@
         (jfif_density_x &lt; 301)">horizontale resolutie niet binnen marges</s:assert>
         <s:assert test="(jfif_density_y &gt; 299) and
         (jfif_density_y &lt; 301)">verticale resolutie niet binnen marges</s:assert>
+        <s:assert test="(components = '3')">verkeerd aantal kleurkanalen</s:assert>
+        <s:assert test="(domponents = '3')">verkeerd aantal pleurkanalen</s:assert>
     </s:rule>
 
     <!-- Tests op gecombineerde niveaus PDF object en image stream -->

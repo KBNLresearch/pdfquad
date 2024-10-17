@@ -1,5 +1,4 @@
 import io
-from pprint import pprint
 from PIL import Image
 from PIL import ImageCms
 import pymupdf
@@ -8,6 +7,10 @@ import pymupdf
 myPDF = "/home/johan/test/BKT-ecur/BKT-ecur002glas01_01.pdf"
 
 doc = pymupdf.open(myPDF)
+
+versionCount = doc.version_count
+
+print(str(versionCount))
 
 catXref = doc.pdf_catalog()  # get xref of the /Catalog
 
