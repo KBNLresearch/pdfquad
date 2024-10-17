@@ -343,6 +343,7 @@ def processPDF(PDF):
                 propsStream['width'] = im.size[0]
                 propsStream['height'] = im.size[1]
                 propsStream['mode'] = im.mode
+                propsStream['components']= len(im.getbands()) 
                 for key, value in im.info.items():
                     if isinstance(value, bytes):
                         propsStream[key] = 'bytes'
