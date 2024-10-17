@@ -386,8 +386,6 @@ def processPDF(PDF):
             # Add page element to pages element
             pagesElt.append(pageElt)
 
-
-
         # Add all child elements to properties element
         propertiesElt.append(fPathElt)
         propertiesElt.append(fSizeElt)
