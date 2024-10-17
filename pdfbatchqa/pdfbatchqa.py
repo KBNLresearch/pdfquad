@@ -295,7 +295,12 @@ def processPDF(PDF):
 
         # Parse PDF
         doc = pymupdf.open(PDF)
+
+        # Page count
         pages = doc.page_count
+        # Document metadata
+        metadata = doc.metadata
+        metadataElt = dictionaryToElt('meta', metadata)
 
         # Read pageMode and Version values from document catalog (if they exist)
         # pageMode is needed for the thumbnail check!
@@ -381,9 +386,12 @@ def processPDF(PDF):
             # Add page element to pages element
             pagesElt.append(pageElt)
 
+
+
         # Add all child elements to properties element
         propertiesElt.append(fPathElt)
         propertiesElt.append(fSizeElt)
+        propertiesElt.append(metadataElt)
         propertiesElt.append(pageModeElt)
         noPagesElt = etree.Element("noPages")
         noPagesElt.text = str(pages)

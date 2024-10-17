@@ -8,9 +8,14 @@ myPDF = "/home/johan/test/BKT-ecur/BKT-ecur002glas01_01.pdf"
 
 doc = pymupdf.open(myPDF)
 
+encrypted = doc.is_encrypted
+
+meta = doc.metadata
+
+version = doc.page_count
 versionCount = doc.version_count
 
-print(str(versionCount))
+print(meta)
 
 catXref = doc.pdf_catalog()  # get xref of the /Catalog
 
