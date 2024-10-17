@@ -7,29 +7,26 @@
 
 
 <s:pattern>
-    <s:title>DBNL PDFs</s:title>
+    <s:title>Tests op eigenschappen</s:title>
 
-    <!-- check of images JPEG formaat hebben -->
-    <!--
-    <s:rule context="/properties/pdfimages/image">
-        <s:assert test="enc = 'jpeg'">imageformaat niet gelijk aan jpeg</s:assert>
+    <!-- Tests op niveau PDF object -->
+    <s:rule context="/properties/pages/page/image/pdf">
+        <s:assert test="(filter = 'DCTDecode')">waarde filter is niet DCTDecode</s:assert>
     </s:rule>
-    -->
 
-    <s:rule context="/properties/pdfimages/image">
-        <!-- Images zijn gecodeerd als JPEG -->
-        <s:assert test="enc = 'jpeg'">imageformaat niet gelijk aan jpeg</s:assert>
-        <!-- Resolutiewaarden zijn conform eisen (binnen marge van +/- 5 ppi) -->
-        <s:assert test="(x-ppi &gt; 299) and
-        (x-ppi &lt; 301)">horizontale resolutie niet binnen acceptabele marges</s:assert>
-        <s:assert test="(y-ppi &gt; 299) and 
-        (y-ppi &lt; 301)">verticale resolutie niet binnen acceptabele marges</s:assert>
-        <!-- Alle pagina's  / images zijn in kleur -->
-        <s:assert test="comp = '3'">aantal kleurcomponenten niet gelijk aan 3</s:assert>
-        <!-- Kleurruimte gedefinieerd d.m.v. ICC profiel -->
-        <!-- LET OP: werkt niet als ICC profiel ingesloten is in JPEG! -->
-        <s:assert test="color = 'icc'">kleurruimte niet gedefinieerd door ICC profiel</s:assert>
+    <!-- Tests op niveau image stream -->
+    <s:rule context="/properties/pages/page/image/stream">
+        <s:assert test="(format = 'JPEG')">formaat imagestream is niet JPEG</s:assert>
+        <s:assert test="(jfif_density_x &gt; 299) and
+        (jfif_density_x &lt; 301)">horizontale resolutie niet binnen marges</s:assert>
+        <s:assert test="(jfif_density_y &gt; 299) and
+        (jfif_density_y &lt; 301)">verticale resolutie niet binnen marges</s:assert>
+    </s:rule>
 
+    <!-- Tests op gecombineerde niveaus PDF object en image stream -->
+    <s:rule context="/properties/pages/page/image">
+        <!-- ICC profiel kan ingesloten zijn als PDF object, in JPEG imagestream, of beide -->
+        <s:assert test="(pdf/colorspace = 'ICCBased') or (stream/icc_profile)">geen ingesloten ICC profiel</s:assert>
     </s:rule>
 
 </s:pattern>
