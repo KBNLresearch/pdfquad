@@ -31,7 +31,7 @@
         (jfif_density_y &lt; 301)">Vertical resolution outside permitted range</s:assert>
         <!-- Check on expected number of color components -->
         <s:assert test="(components = '3')">Unexpected number of color components (expected: 3)</s:assert>
-      </s:rule>
+    </s:rule>
 
     <!-- Checks at combined PDF object and image stream levels -->
     <s:rule context="/properties/pages/page/image">
@@ -52,4 +52,3 @@
 
 </s:pattern>
 </s:schema>
-
