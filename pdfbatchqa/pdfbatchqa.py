@@ -251,6 +251,52 @@ def dictionaryToElt(name, dictionary):
     return elt
 
 
+def getBPC(image):
+    """Return Bits per Component as a function of mode and components values"""
+    mode_to_bpp = {"1": 1,
+                   "L": 8,
+                   "P": 8,
+                   "RGB": 24,
+                   "RGBA": 32,
+                   "CMYK": 32,
+                   "YCbCr": 24,
+                   "LAB": 24,
+                   "HSV": 24,
+                   "I": 32,
+                   "F": 32}
+
+    bitsPerPixel = mode_to_bpp[image.mode]
+    noComponents = len(image.getbands())
+
+    if noComponents != 0  and isinstance(bitsPerPixel, int):
+        bpc = bitsPerPixel/noComponents
+    else:
+        bpc = -9999
+
+    return bpc
+
+
+def getCompressionRatio(noBytes, bpc, components, width, height):
+    """Compute compression ratio.
+    """
+    # Total bytes per pixel
+    bytesPerPixel = (bpc * components)/8
+
+    # Uncompressed image size
+    sizeUncompressed = bytesPerPixel * width * height
+
+    # Compression ratio
+    if noBytes != 0:
+        compressionRatio = sizeUncompressed / noBytes
+    else:
+        # Obviously something going wrong here ...
+        compressionRatio = -9999
+
+    compressionRatio = round(compressionRatio, 2)
+
+    return compressionRatio
+
+
 def processPDF(PDF):
     """Process one PDF"""
 
@@ -260,6 +306,9 @@ def processPDF(PDF):
 
     # Initialise empty text string for error log output
     ptOutString = ""
+
+    # Create output element for this PDF
+    pdfElt = etree.Element("file")
 
     # Create list that contains all file path components (dir names)
     pathComponents, fName = getPathComponentsAsList(PDF)
@@ -279,10 +328,6 @@ def processPDF(PDF):
         ptOutString += description + config.lineSep
 
     if schemaMatch:
-
-        # Create output element for this PDF
-        pdfElt = etree.Element("file")
-
         # Create and fill descriptive elements
         fPathElt = etree.Element("filePath")
         fPathElt.text = PDF
@@ -335,18 +380,26 @@ def processPDF(PDF):
                 # Read raw image stream data from xref id
                 xref = propsPDF['xref']
                 stream = doc.xref_stream_raw(xref)
-
-                with open('test.dat', 'wb') as fOut:
-                    fOut.write(stream)
-
+                noBytesStream = len(stream)
                 im = Image.open(io.BytesIO(stream))
                 im.load()
                 propsStream = {}
                 propsStream['format'] = im.format
-                propsStream['width'] = im.size[0]
-                propsStream['height'] = im.size[1]
+                width = im.size[0]
+                height = im.size[1]
+                propsStream['width'] = width
+                propsStream['height'] = height
                 propsStream['mode'] = im.mode
-                propsStream['components']= len(im.getbands()) 
+                noComponents = len(im.getbands())
+                propsStream['components']= noComponents
+                bitsPerComponent = getBPC(im)
+                propsStream['bpc'] = bitsPerComponent
+                propsStream['compressionRatio'] = getCompressionRatio(noBytesStream,
+                                                                      bitsPerComponent,
+                                                                      noComponents,
+                                                                      width,
+                                                                      height)
+
                 for key, value in im.info.items():
                     if isinstance(value, bytes):
                         propsStream[key] = 'bytes'
