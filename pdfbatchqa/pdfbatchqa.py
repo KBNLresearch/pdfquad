@@ -269,7 +269,7 @@ def getBPC(image):
     noComponents = len(image.getbands())
 
     if noComponents != 0  and isinstance(bitsPerPixel, int):
-        bpc = bitsPerPixel/noComponents
+        bpc = int(bitsPerPixel/noComponents)
     else:
         bpc = -9999
 
