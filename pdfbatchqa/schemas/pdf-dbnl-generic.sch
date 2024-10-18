@@ -30,7 +30,7 @@
     <!-- Tests at combined PDF object and image stream levels -->
     <s:rule context="/properties/pages/page/image">
         <!-- ICC profile can be embedded as a PDF object, in the JPEG image stream, or both -->
-        <s:assert test="(pdf/colorspace = 'ICCBased') or (stream/icc_profile)">Mising embedded ICC profile</s:assert>
+        <s:assert test="(pdf/colorspace = 'ICCBased') or (stream/icc_profile)">Missing embedded ICC profile</s:assert>
         <!-- Consistency checks on width, height values at pdf and image stream levels -->
         <s:assert test="(pdf/width = stream/width)">Width values at PDF and image stream levels are not the same</s:assert>
         <s:assert test="(pdf/height = stream/height)">Height values at PDF and image stream levels are not the same</s:assert>
