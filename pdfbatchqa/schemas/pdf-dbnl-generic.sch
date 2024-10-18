@@ -15,7 +15,7 @@
         <s:assert test="(encryption = 'None')">PDF uses encryption</s:assert>
     </s:rule>
 
-    <!-- Tests PDF object level -->
+    <!-- Tests at PDF object level -->
     <s:rule context="/properties/pages/page/image/pdf">
         <s:assert test="(filter = 'DCTDecode')">Unexpected filter value (expected: DCTDecode)</s:assert>
     </s:rule>
@@ -39,6 +39,12 @@
         <s:assert test="(pdf/height = stream/height)">Height values at PDF and image stream levels are not the same</s:assert>
         <!-- Consistency check on bpc values at pdf and image stream levels -->
         <s:assert test="(pdf/bpc = stream/bpc)">Bit per component values at PDF and image stream levels are not the same</s:assert>
+    </s:rule>
+
+    <!-- Tests at properties level -->
+    <s:rule context="/properties">
+        <!-- PageMode value /UseThumbs is not allowed -->
+        <s:assert test="(PageMode  != '/UseThumbs')">PageMode value is /UseThumbs</s:assert>
     </s:rule>
 
 </s:pattern>
