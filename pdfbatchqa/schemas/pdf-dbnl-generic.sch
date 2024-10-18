@@ -1,10 +1,7 @@
 <?xml version="1.0"?>
-<!--
-   Schematron schema for DBNL PDFs: verify if PDF conforms to 
-   KB requirements. 
--->
-<s:schema xmlns:s="http://purl.oclc.org/dsdl/schematron">
+<!-- Schematron rules for DBNL PDFs -->
 
+<s:schema xmlns:s="http://purl.oclc.org/dsdl/schematron">
 
 <s:pattern>
     <s:title>DBNL profile tests</s:title>

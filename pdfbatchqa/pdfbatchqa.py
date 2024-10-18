@@ -103,6 +103,10 @@ def parseCommandLine():
                         action="store",
                         help='name of profile that defines validation schemas.\
                               Type "l" or "list" to view all available profiles')
+    parser.add_argument('--verbose',
+                        action="store_true",
+                        default=False,
+                        help="report Schematron report in verbose format")
     parser.add_argument('--version', '-v',
                         action="version",
                         version=__version__)
@@ -241,6 +245,17 @@ def extractSchematron(report):
     return outString
 
 
+def summariseSchematron(report):
+    """Return summarized version of Schematron report with only output of
+    failed tests"""
+
+    for elem in report.iter():
+        if elem.tag == "{http://purl.oclc.org/dsdl/svrl}fired-rule":
+            elem.getparent().remove(elem)
+
+    return report
+
+
 def dictionaryToElt(name, dictionary):
     """Create Element object from dictionary"""
     elt = etree.Element(name)
@@ -297,7 +312,7 @@ def getCompressionRatio(noBytes, bpc, components, width, height):
     return compressionRatio
 
 
-def processPDF(PDF):
+def processPDF(PDF, verboseFlag):
     """Process one PDF"""
 
     # Initialise status (pass/fail)
@@ -461,8 +476,12 @@ def processPDF(PDF):
             description = "Schematron validation resulted in an error"
             ptOutString += description + config.lineSep
 
-        # Re-parse Schematron report and add to report element
+        # Re-parse Schematron report
         report = etree.fromstring(str(report))
+        # Make report less verbose
+        if not verboseFlag:
+            report = summariseSchematron(report)
+        # Add to report element
         reportElt.append(report)
         # Add all child elements to PDF element
         pdfElt.append(propertiesElt)
@@ -535,7 +554,9 @@ def main():
     else:
         profile = os.path.join(profilesDir, profile)
         checkFileExists(profile)
-    
+
+    verboseFlag = args.verbose
+
     # Get schema locations from profile
     schemas = readProfile(profile, schemasDir)
 
@@ -578,7 +599,7 @@ def main():
     # Iterate over all PDFs
     for myPDF in listPDFs:
         myPDF = os.path.abspath(myPDF)
-        pdfResult = processPDF(myPDF)
+        pdfResult = processPDF(myPDF, verboseFlag)
         if len(pdfResult) != 0:
             # Convert output to XML and add to output file
             outXML = etree.tostring(pdfResult,
