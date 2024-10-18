@@ -579,7 +579,7 @@ def main():
     for myPDF in listPDFs:
         myPDF = os.path.abspath(myPDF)
         pdfResult = processPDF(myPDF)
-        if isinstance(pdfResult, etree._Element):
+        if len(pdfResult) != 0:
             # Convert output to XML and add to output file
             outXML = etree.tostring(pdfResult,
                                     method='xml',
