@@ -4,7 +4,7 @@
 <s:schema xmlns:s="http://purl.oclc.org/dsdl/schematron">
 
 <s:pattern>
-    <s:title>DBNL profile tests</s:title>
+    <s:title>DBNL profile checks</s:title>
 
     <!-- Checks at PDF metadata level -->
     <s:rule context="/properties/meta">
