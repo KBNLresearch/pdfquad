@@ -4,13 +4,6 @@
 
 Johan van der Knijff
 
-Requires Python 3.2 or more recent
-
-Preconditions:
-
-- Files that are to be analysed have a .pdf extension (all others ignored!)
-- Parent directory of pdf files is called ???
-
 Copyright 2024, KB/National Library of the Netherlands
 
 """
@@ -22,6 +15,7 @@ import io
 import time
 import argparse
 import csv
+import logging
 from lxml import isoschematron
 from lxml import etree
 import pymupdf
@@ -79,7 +73,6 @@ def parseCommandLine():
     """Parse command line"""
 
     # Create parser
-    ## TODO: add config file location for Windows
     parser = argparse.ArgumentParser(description="Automated PDF Quality Assessment digitisation batches")
 
     parser.add_argument('profile',
@@ -344,10 +337,7 @@ def processPDF(PDF, verboseFlag, schemas):
                 schemaMatch = True
 
     if not schemaMatch:
-        # TODO: should we quietly ignore this, or report it somewhere?
-        # TODO: use logging for this instead!
-        pass
-
+        logging.warning("no schema match")
 
     if schemaMatch:
         # Get schema as lxml.etree element
@@ -491,9 +481,7 @@ def processPDF(PDF, verboseFlag, schemas):
             report = schematron.validation_report
 
         except Exception:
-            # TODO: use logging for this instead!
-            config.status = "fail"
-            description = "Schematron validation resulted in an error"
+            logging.error(("Schematron validation failed for {}").format(mySchema))
 
         # Re-parse Schematron report
         report = etree.fromstring(str(report))
@@ -575,6 +563,12 @@ def main():
 
     verboseFlag = args.verbose
 
+    # Set up logging
+    logFile = os.path.normpath(("{}.log").format(prefixBatch))
+    logging.basicConfig(handlers=[logging.FileHandler(logFile, 'a', 'utf-8')],
+                        level=logging.INFO,
+                        format='%(asctime)s - %(levelname)s - %(message)s')
+
     # Get schema patterns and locations from profile
     schemas = readProfile(profile, schemasDir)
 
@@ -585,6 +579,7 @@ def main():
         writer.writerow(["file", "status", "noPages", "fileOut"])
 
     listPDFs = getFilesFromTree(batchDir, "pdf")
+
 
     # start clock for statistics
     start = time.time()
@@ -597,6 +592,7 @@ def main():
     writeXMLHeader(fileOut)
 
     for myPDF in listPDFs:
+        logging.info(("file: {}").format(myPDF))
         if pdfCount > maxPDFs:
             writeXMLFooter(fileOut)
             outFileCount += 1
