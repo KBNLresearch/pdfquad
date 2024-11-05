@@ -2,19 +2,15 @@
 
 <profile>
 
-<!-- Profiel voor KB digitaliseringstrajecten:
+<!-- Profile for DBNL fulltext digitization batches. Each "schema"
+element links a search pattern to a corresponding schema
 
-DBNL fulltext
-
- -->
-
-<!-- Names of Schematron schemas for PDFs created at
-50% and 85% JPEG quality (currently same schema is used
-in both cases because we can't reliably test JPEG quality!)
+- Value for "type" is either "fileName or "parentDirName"
+- Value for "match" is either "is", "startswith" or "endswith"
 -->
 
-<schemaLowQuality>pdf-dbnl-generic.sch</schemaLowQuality>
-<schemaHighQuality>pdf-dbnl-generic.sch</schemaHighQuality>
+<schema type="parentDirName" match="endswith" pattern="i-85">pdf-dbnl-85.sch</schema>
+<schema type="parentDirName" match="endswith" pattern="i-50">pdf-dbnl-50.sch</schema>
 
 </profile>
 

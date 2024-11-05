@@ -33,7 +33,7 @@ __version__ = "0.1.0"
 
 def errorExit(msg):
     """Write error to stderr and exit"""
-    msgString = ("ERROR: " + msg + "\n")
+    msgString = "ERROR: {}\n".format(msg)
     sys.stderr.write(msgString)
     sys.exit()
 
@@ -41,14 +41,14 @@ def errorExit(msg):
 def checkFileExists(fileIn):
     """Check if file exists and exit if not"""
     if not os.path.isfile(fileIn):
-        msg = fileIn + " does not exist!"
+        msg = "{} does not exist".format(fileIn)
         errorExit(msg)
 
 
 def checkDirExists(pathIn):
     """Check if directory exists and exit if not"""
     if not os.path.isdir(pathIn):
-        msg = pathIn + " does not exist!"
+        msg = "{} does not exist".format(pathIn) 
         errorExit(msg)
 
 
@@ -59,7 +59,7 @@ def openFileForAppend(wFile):
         return f
 
     except Exception:
-        msg = wFile + " could not be written"
+        msg = "{} could not be written".format(wFile) 
         errorExit(msg)
 
 
@@ -69,7 +69,7 @@ def removeFile(fileIn):
         if os.path.isfile(fileIn):
             os.remove(fileIn)
     except Exception:
-        msg = "Could not remove " + fileIn
+        msg = "Could not remove {}".format(fileIn)
         errorExit(msg)
 
 
@@ -130,33 +130,53 @@ def listProfiles(profilesDir):
 
 
 def readProfile(profile, schemasDir):
-    """Read a profile and return dictionary with all associated schemas"""
+    """Read a profile and returns list with for each schema
+    element the corresponding type, matching method, matching
+    pattern and schematronj file"""
 
     # Parse XML tree
     try:
         tree = etree.parse(profile)
         prof = tree.getroot()
     except Exception:
-        msg = "error parsing " + profile
+        msg = "error parsing {}".format(profile)
         errorExit(msg)
 
+    # Output list
+    listOut = []
+
     # Locate schema elements
-    schemaLowQualityElement = prof.find("schemaLowQuality")
-    schemaHighQualityElement = prof.find("schemaHighQuality")
+    schemas = prof.findall("schema")
 
-    # Get corresponding text values
-    schemaLowQuality = os.path.join(schemasDir, schemaLowQualityElement.text)
-    schemaHighQuality = os.path.join(schemasDir, schemaHighQualityElement.text)
- 
-    # Check if all files exist, and exit if not
-    checkFileExists(schemaLowQuality)
-    checkFileExists(schemaHighQuality)
+    for schema in schemas:
+        try:
+            mType = schema.attrib["type"]
+            if mType not in ["fileName", "parentDirName"]:
+                msg = "'{}' is not a valid 'type' value".format(mType)
+                errorExit(msg)
+        except KeyError:
+            msg = "missing 'type' attribute in profile {}".format(profile)
+            errorExit(msg)
+        try:
+            mMatch = schema.attrib["match"]
+            if mMatch not in ["is", "startswith", "endswith"]:
+                msg = "'{}' is not a valid 'match' value".format(mMatch)
+                errorExit(msg)
+        except KeyError:
+            msg = "missing 'match' attribute in profile {}".format(profile)
+            errorExit(msg)
+        try:
+            mPattern = schema.attrib["pattern"]
+        except KeyError:
+            msg = "missing 'pattern' attribute in profile {}".format(profile)
+            errorExit(msg)
 
-    # Add schemas to a dictionary
-    schemas = {"schemaLowQuality": schemaLowQuality,
-               "schemaHighQuality": schemaHighQuality}
+        schematronFile = os.path.join(schemasDir, schema.text)
+        checkFileExists(schematronFile)
 
-    return schemas
+        listOut.append([mType, mMatch, mPattern, schematronFile])
+
+    return listOut
 
 
 def readAsLXMLElt(xmlFile):
@@ -312,12 +332,11 @@ def getCompressionRatio(noBytes, bpc, components, width, height):
     return compressionRatio
 
 
-def processPDF(PDF, verboseFlag):
+def processPDF(PDF, verboseFlag, schemas):
     """Process one PDF"""
 
     # Initialise status (pass/fail)
     config.status = "pass"
-    schemaMatch = True
 
     # Initialise empty text string for error log output
     ptOutString = ""
@@ -327,17 +346,47 @@ def processPDF(PDF, verboseFlag):
 
     # Create list that contains all file path components (dir names)
     pathComponents, fName = getPathComponentsAsList(PDF)
+    # Direct parent dir name
+    parentDir = pathComponents[-1]
 
-    # Select schema based on whether this is a PDF with 50% or 85%
-    # JPEG quality (from path name pattern in batch)
-    if "300ppi-50" in pathComponents:
-        mySchema = config.schemaLowQualityLXMLElt
-        schemaMatch = True
-    elif "300ppi-85" in pathComponents:
-        mySchema = config.schemaHighQualityLXMLElt
-        schemaMatch = True
-    else:
-        schemaMatch = False
+    # Flag that indicates whether PDF matches with a schema
+    schemaMatch = False
+
+    # Select schema based on directory or file name pattern defined in profile
+    for schema in schemas:
+        mType = schema[0]
+        mMatch = schema[1]
+        mPattern = schema[2]
+        mSchema = schema[3]
+        if mType == "parentDirName" and mMatch == "is":
+            if parentDir == mPattern:
+                mySchema = mSchema
+                schemaMatch = True
+        elif mType == "parentDirName" and mMatch == "startswith":
+            if parentDir.startswith(mPattern):
+                mySchema = mSchema
+                schemaMatch = True
+        elif mType == "parentDirName" and mMatch == "endswith":
+            if parentDir.endswith(mPattern):
+                mySchema = mSchema
+                schemaMatch = True
+        if mType == "fileName" and mMatch == "is":
+            if fName == mPattern:
+                mySchema = mSchema
+                schemaMatch = True
+        elif mType == "fileName" and mMatch == "startswith":
+            if fName.startswith(mPattern):
+                mySchema = mSchema
+                schemaMatch = True
+        elif mType == "fileName" and mMatch == "endswith":
+            if fName.endswith(mPattern):
+                mySchema = mSchema
+                schemaMatch = True
+
+    # Get schema as lxml.etree element
+    mySchemaElt = readAsLXMLElt(mySchema)
+
+    if not schemaMatch:
         config.status = "fail"
         description = "Name of parent directory does not match any schema"
         ptOutString += description + config.lineSep
@@ -464,7 +513,7 @@ def processPDF(PDF, verboseFlag):
 
         try:
             # Start Schematron magic ...
-            schematron = isoschematron.Schematron(mySchema,
+            schematron = isoschematron.Schematron(mySchemaElt,
                                                   store_report=True)
 
             # Validate tools output against schema
@@ -557,16 +606,9 @@ def main():
 
     verboseFlag = args.verbose
 
-    # Get schema locations from profile
+    # Get schema patterns and locations from profile
     schemas = readProfile(profile, schemasDir)
 
-    schemaLowQuality = schemas["schemaLowQuality"]
-    schemaHighQuality = schemas["schemaHighQuality"]
- 
-    # Get schemas as lxml.etree elements
-    config.schemaLowQualityLXMLElt = readAsLXMLElt(schemaLowQuality)
-    config.schemaHighQualityLXMLElt = readAsLXMLElt(schemaHighQuality)
- 
     # Set line separator for output/ log files to OS default
     config.lineSep = "\n"
 
@@ -599,7 +641,7 @@ def main():
     # Iterate over all PDFs
     for myPDF in listPDFs:
         myPDF = os.path.abspath(myPDF)
-        pdfResult = processPDF(myPDF, verboseFlag)
+        pdfResult = processPDF(myPDF, verboseFlag, schemas)
         if len(pdfResult) != 0:
             # Convert output to XML and add to output file
             outXML = etree.tostring(pdfResult,
