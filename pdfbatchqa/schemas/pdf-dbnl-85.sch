@@ -25,12 +25,15 @@
         <!-- Check on expected format of the image stream -->
         <s:assert test="(format = 'JPEG')">Unexpected image stream format (expected: JPEG)</s:assert>
         <!-- Check on horizontal and vertical resolution (with tolerance of +/- 1 ppi) -->
-        <s:assert test="(jfif_density_x &gt; 299) and
-        (jfif_density_x &lt; 301)">Horizontal resolution outside permitted range</s:assert>
-        <s:assert test="(jfif_density_y &gt; 299) and
-        (jfif_density_y &lt; 301)">Vertical resolution outside permitted range</s:assert>
+        <s:assert test="(jfif_density_x &gt;= 299) and
+        (jfif_density_x &lt;= 301)">Horizontal resolution outside permitted range</s:assert>
+        <s:assert test="(jfif_density_y &gt;= 299) and
+        (jfif_density_y &lt;= 301)">Vertical resolution outside permitted range</s:assert>
         <!-- Check on expected number of color components -->
         <s:assert test="(components = '3')">Unexpected number of color components (expected: 3)</s:assert>
+        <!-- Check on JPEG compression quality level (with tolerance of +/- 2 levels) -->
+        <s:assert test="(JPEGQuality &gt;= 83) and
+        (JPEGQuality &lt;= 87)">JPEG compression quality outside permitted range</s:assert>
     </s:rule>
 
     <!-- Checks at combined PDF object and image stream levels -->
