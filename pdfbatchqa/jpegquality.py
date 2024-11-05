@@ -13,6 +13,13 @@ Which is in turn based on the original ImageMagick code:
 https://github.com/ImageMagick/ImageMagick/blob/7.1.0-57/coders/jpeg.c#L782
 
 See also https://stackoverflow.com/questions/4354543/
+
+Usage:
+
+```
+image = Img.open(...)
+quality = get_jpg_quality(image)
+```
 """
 
 def computeJPEGQuality(image):
@@ -94,3 +101,11 @@ def computeJPEGQuality(image):
                 return i+1
             break
     return -9999
+
+
+def main():
+
+
+
+if __name__ == "__main__":
+    main()
