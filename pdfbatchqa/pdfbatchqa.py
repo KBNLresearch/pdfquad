@@ -26,6 +26,7 @@ from lxml import etree
 import pymupdf
 from PIL import Image
 from PIL import ImageCms
+from . import jpegquality
 from . import config
 
 __version__ = "0.1.0"
@@ -310,27 +311,6 @@ def getBPC(image):
     return bpc
 
 
-def getCompressionRatio(noBytes, bpc, components, width, height):
-    """Compute compression ratio.
-    """
-    # Total bytes per pixel
-    bytesPerPixel = (bpc * components)/8
-
-    # Uncompressed image size
-    sizeUncompressed = bytesPerPixel * width * height
-
-    # Compression ratio
-    if noBytes != 0:
-        compressionRatio = sizeUncompressed / noBytes
-    else:
-        # Obviously something going wrong here ...
-        compressionRatio = -9999
-
-    compressionRatio = round(compressionRatio, 2)
-
-    return compressionRatio
-
-
 def processPDF(PDF, verboseFlag, schemas):
     """Process one PDF"""
 
@@ -457,11 +437,15 @@ def processPDF(PDF, verboseFlag, schemas):
                 propsStream['components']= noComponents
                 bitsPerComponent = getBPC(im)
                 propsStream['bpc'] = bitsPerComponent
-                propsStream['compressionRatio'] = getCompressionRatio(noBytesStream,
-                                                                      bitsPerComponent,
-                                                                      noComponents,
-                                                                      width,
-                                                                      height)
+
+                try:
+                    # Estimate JPEG quality using least squares matching against
+                    # standard quantization tables
+                    quality, rmsError, nse = jpegquality.computeJPEGQuality(im)
+                    propsStream['JPEGQuality'] = quality
+                    propsStream['NSE_JPEGQuality'] = nse
+                except Exception:
+                    pass
 
                 for key, value in im.info.items():
                     if isinstance(value, bytes):
@@ -622,13 +606,13 @@ def main():
     # Open log files for writing (append)
 
     # File with summary of quality check status (pass/fail) for each image
-    statusLog = os.path.normpath(("{}._status.csv").format(prefixBatch))
+    statusLog = os.path.normpath(("{}_status.csv").format(prefixBatch))
     removeFile(statusLog)
     config.fStatus = openFileForAppend(statusLog)
 
     # File that contains detailed results for all images that failed
     # quality check
-    failedLog = os.path.normpath(("{}._failed.txt").format(prefixBatch))
+    failedLog = os.path.normpath(("{}_failed.txt").format(prefixBatch))
     removeFile(failedLog)
     config.fFailed = openFileForAppend(failedLog)
 
