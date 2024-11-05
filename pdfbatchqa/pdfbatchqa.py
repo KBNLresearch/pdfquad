@@ -400,6 +400,11 @@ def processPDF(PDF, verboseFlag, schemas):
         else:
             pageModeElt.text = pageMode[1]
 
+        # Check for digital signatures
+        signatureFlag = doc.get_sigflags()
+        signatureFlagElt = etree.Element("signatureFlag")
+        signatureFlagElt.text = str(signatureFlag)
+
         # Wrapper element for pages output
         pagesElt = etree.Element("pages")
 
@@ -489,6 +494,7 @@ def processPDF(PDF, verboseFlag, schemas):
         propertiesElt.append(fSizeElt)
         propertiesElt.append(metadataElt)
         propertiesElt.append(pageModeElt)
+        propertiesElt.append(signatureFlagElt)
         noPagesElt = etree.Element("noPages")
         noPagesElt.text = str(pages)
         propertiesElt.append(noPagesElt)

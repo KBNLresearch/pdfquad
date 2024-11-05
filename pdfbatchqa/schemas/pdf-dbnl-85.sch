@@ -57,6 +57,8 @@
     <s:rule context="/properties">
         <!-- Check on PageMode value to ensure document doesn't open with thumbnails -->
         <s:assert test="(PageMode  != '/UseThumbs')">PageMode value is /UseThumbs</s:assert>
+        <!-- Check on signatureFlag value to ensure document doesn't contain digital signatures -->
+        <s:assert test="(signatureFlag  = -1)">Document contains one or more digital signatures</s:assert>
     </s:rule>
 
 </s:pattern>
