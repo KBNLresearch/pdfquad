@@ -17,7 +17,7 @@
     <!-- Checks at page level -->
     <s:rule context="/properties/pages/page">
         <!-- Check on presence of only 1 image for each page -->
-        <s:assert test="(count(image) = 1)">Unexpected number of images on page</s:assert> 
+        <s:assert test="(count(image) = 1)">Unexpected number of images on page (expected: 1)</s:assert> 
     </s:rule>
 
     <!-- Checks at PDF object level -->
