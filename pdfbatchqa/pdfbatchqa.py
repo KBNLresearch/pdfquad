@@ -75,18 +75,6 @@ def removeFile(fileIn):
         errorExit(msg)
 
 
-def constructFileName(fileIn, extOut, suffixOut):
-    """Construct filename by replacing path by pathOut,
-    adding suffix and extension
-    """
-
-    fileInTail = os.path.split(fileIn)[1]
-    baseNameIn = os.path.splitext(fileInTail)[0]
-    baseNameOut = baseNameIn + suffixOut + "." + extOut
-    fileOut = baseNameOut
-    return fileOut
-
-
 def parseCommandLine():
     """Parse command line"""
 
@@ -100,6 +88,11 @@ def parseCommandLine():
     parser.add_argument('batchDir',
                         action="store",
                         help="batch directory")
+    parser.add_argument('--maxpdfs',
+                        action="store",
+                        default=10,
+                        help="maximum number of reported PDFs per output file; for larger numbers \
+                              output is split across multiple files")
     parser.add_argument('--prefixout',
                         action="store",
                         default='bqa',
@@ -288,6 +281,21 @@ def getBPC(image):
         bpc = -9999
 
     return bpc
+
+
+def writeXMLHeader(fileOut):
+    """Write XML header"""
+    xmlHead = "<?xml version='1.0' encoding='UTF-8'?>\n"
+    xmlHead += "<pdfbatchqa>\n"
+    with open(fileOut,"wb") as f:
+        f.write(xmlHead.encode('utf-8'))
+
+
+def writeXMLFooter(fileOut):
+    """Write XML footer"""
+    xmlFoot = "</pdfbatchqa>\n"
+    with open(fileOut,"ab") as f:
+        f.write(xmlFoot.encode('utf-8'))
 
 
 def processPDF(PDF, verboseFlag, schemas):
@@ -557,12 +565,13 @@ def main():
 
     # Construct output prefix for this batch
     prefixBatch = ("{}_{}").format(prefixOut, batchDirName)
-
-    fileOut = ("{}.xml").format(prefixBatch)
-
     profile = args.profile
     profile = os.path.join(profilesDir, profile)
     checkFileExists(profile)
+
+    # This option sets a limit on the number of PDFs that is reported for each XML
+    # output file
+    maxPDFs = int(args.maxpdfs)
 
     verboseFlag = args.verbose
 
@@ -573,7 +582,7 @@ def main():
     summaryFile = os.path.normpath(("{}_summary.csv").format(prefixBatch))
     with open(summaryFile, 'w', newline='', encoding='utf-8') as fSum:
         writer = csv.writer(fSum)
-        writer.writerow(["file", "status", "noPages"])
+        writer.writerow(["file", "status", "noPages", "fileOut"])
 
     listPDFs = getFilesFromTree(batchDir, "pdf")
 
@@ -581,15 +590,19 @@ def main():
     start = time.time()
     print("pdfbatchqa started: " + time.asctime())
 
-    # Write XML header
-    xmlHead = "<?xml version='1.0' encoding='UTF-8'?>\n"
-    xmlHead += "<pdfbatchqa>\n"
-
-    with open(fileOut,"wb") as f:
-        f.write(xmlHead.encode('utf-8'))
-
     # Iterate over all PDFs
+    pdfCount = 1
+    outFileCount = 1
+    fileOut = ("{}_{}.xml").format(prefixBatch, str(outFileCount).zfill(3))
+    writeXMLHeader(fileOut)
+
     for myPDF in listPDFs:
+        if pdfCount > maxPDFs:
+            writeXMLFooter(fileOut)
+            outFileCount += 1
+            fileOut = ("{}_{}.xml").format(prefixBatch, str(outFileCount).zfill(3))
+            writeXMLHeader(fileOut)
+            pdfCount = 1
         myPDF = os.path.abspath(myPDF)
         pdfResult = processPDF(myPDF, verboseFlag, schemas)
         if len(pdfResult) != 0:
@@ -597,7 +610,7 @@ def main():
             status = pdfResult.find('status').text
             with open(summaryFile, 'a', newline='', encoding='utf-8') as fSum:
                 writer = csv.writer(fSum)
-                writer.writerow([myPDF, status, noPages])
+                writer.writerow([myPDF, status, noPages, fileOut])
             # Convert output to XML and add to output file
             outXML = etree.tostring(pdfResult,
                                     method='xml',
@@ -607,12 +620,10 @@ def main():
 
             with open(fileOut,"ab") as f:
                 f.write(outXML)
+            
+            pdfCount += 1
 
-    # Write XML footer
-    xmlFoot = "</pdfbatchqa>\n"
-
-    with open(fileOut,"ab") as f:
-        f.write(xmlFoot.encode('utf-8'))
+    writeXMLFooter(fileOut)
 
     # Timing output
     end = time.time()
