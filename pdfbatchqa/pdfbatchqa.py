@@ -17,15 +17,15 @@ Copyright 2024, KB/National Library of the Netherlands
 
 import sys
 import os
+import shutil
 import io
 import time
-import configargparse
+import argparse
 from lxml import isoschematron
 from lxml import etree
 import pymupdf
 from PIL import Image
 from PIL import ImageCms
-from . import writeconfig
 from . import config
 
 __version__ = "0.1.0"
@@ -90,19 +90,18 @@ def parseCommandLine():
 
     # Create parser
     ## TODO: add config file location for Windows
-    parser = configargparse.ArgumentParser(description="Automated PDF Quality Assessment digitisation batches",
-                                           default_config_files=[config.configfile])
+    parser = argparse.ArgumentParser(description="Automated PDF Quality Assessment digitisation batches")
 
+    parser.add_argument('profile',
+                        action="store",
+                        help='validation profile file')
     parser.add_argument('batchDir',
                         action="store",
                         help="batch directory")
     parser.add_argument('--prefixout',
                         action="store",
+                        default='bqa',
                         help="prefix of output files")
-    parser.add_argument('--profile',
-                        action="store",
-                        help='name of profile that defines validation schemas.\
-                              Type "l" or "list" to view all available profiles')
     parser.add_argument('--verbose',
                         action="store_true",
                         default=False,
@@ -562,7 +561,7 @@ def processPDF(PDF, verboseFlag, schemas):
 def main():
     """Main function"""
 
-    # Path to configuration file (from https://stackoverflow.com/a/53222876/1209004
+    # Path to configuration dir (from https://stackoverflow.com/a/53222876/1209004
     # and https://stackoverflow.com/a/13184486/1209004).
     # TODO on Windows this should return the AppData/Local folder, does this work??
     configpath = os.path.join(
@@ -571,38 +570,46 @@ def main():
     os.path.join(os.environ['HOME'], '.config'),
     "pdfbatchqa")
 
-    config.configfile = os.path.join(configpath, 'pdfbatchqa.conf')
-
-    # Create config directory + file if it doesn't exist already
-    if not os.path.isfile(config.configfile):
-        writeconfig.writeConfigFile(config.configfile)
+     # Create config directory if it doesn't exist already
+    if not os.path.isdir(configpath):
+        os.mkdir(configpath)
    
     # Locate package directory
     packageDir = os.path.dirname(os.path.abspath(__file__))
 
-    # Profiles and schemas dirs.
-    profilesDir = os.path.join(packageDir, "profiles")
-    schemasDir = os.path.join(packageDir, "schemas")
+    # Profile and schema locations in installed package and config folder
+    profilesDirPackage = os.path.join(packageDir, "profiles")
+    schemasDirPackage = schemasDir = os.path.join(packageDir, "schemas")
+    profilesDir = os.path.join(configpath, "profiles")
+    schemasDir = os.path.join(configpath, "schemas")
 
-    # Check if profiles dir exists and exit if not
-    checkDirExists(profilesDir)
+    # Check if package profiles and schemas dirs exist
+    checkDirExists(profilesDirPackage)
+    checkDirExists(schemasDirPackage)
+
+    # Copy profiles and schemas to respective dirs in config dir
+    if not os.path.isdir(profilesDir):
+        shutil.copytree(profilesDirPackage, profilesDir)
+    if not os.path.isdir(schemasDir):
+        shutil.copytree(schemasDirPackage, schemasDir)
 
     # Get input from command line
     args = parseCommandLine()
 
     batchDir = args.batchDir
     prefixOut = args.prefixout
-    fileOut = prefixOut + ".xml"
+
+    # Batch dir name
+    batchDirName = os.path.basename(batchDir)
+
+    # Construct output prefix for this batch
+    prefixBatch = ("{}_{}").format(prefixOut, batchDirName)
+
+    fileOut = ("{}.xml").format(prefixBatch)
 
     profile = args.profile
-    if profile in["l", "list"]:
-        listProfiles(profilesDir)
-    elif profile is None:
-        msg = "profile is undefined"
-        errorExit(msg)
-    else:
-        profile = os.path.join(profilesDir, profile)
-        checkFileExists(profile)
+    profile = os.path.join(profilesDir, profile)
+    checkFileExists(profile)
 
     verboseFlag = args.verbose
 
@@ -615,13 +622,13 @@ def main():
     # Open log files for writing (append)
 
     # File with summary of quality check status (pass/fail) for each image
-    statusLog = os.path.normpath(prefixOut + "_status.csv")
+    statusLog = os.path.normpath(("{}._status.csv").format(prefixBatch))
     removeFile(statusLog)
     config.fStatus = openFileForAppend(statusLog)
 
     # File that contains detailed results for all images that failed
     # quality check
-    failedLog = os.path.normpath(prefixOut + "_failed.txt")
+    failedLog = os.path.normpath(("{}._failed.txt").format(prefixBatch))
     removeFile(failedLog)
     config.fFailed = openFileForAppend(failedLog)
 
@@ -672,7 +679,7 @@ def main():
     timeElapsed = end - start
     timeInMinutes = round((timeElapsed / 60), 2)
 
-    print("Elapsed time: " + str(timeInMinutes) + " minutes")
+    print("Elapsed time: {} minutes".format(timeInMinutes))
 
 
 if __name__ == "__main__":
