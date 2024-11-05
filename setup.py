@@ -21,8 +21,7 @@ def find_version(*file_paths):
 
 INSTALL_REQUIRES = ['setuptools',
                     'lxml', 
-                    'ConfigArgParse',
-                    'pillow',
+                    'pillow>=9.0.0',
                     'pymupdf']
 PYTHON_REQUIRES = '>=3.8, <4'
 
