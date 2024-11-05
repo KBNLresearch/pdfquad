@@ -21,6 +21,7 @@ import shutil
 import io
 import time
 import argparse
+import csv
 from lxml import isoschematron
 from lxml import etree
 import pymupdf
@@ -243,28 +244,6 @@ def getPathComponentsAsList(path):
     return(folders, fileComponent)
 
 
-def extractSchematron(report):
-    """Parse output of Schematron validation and extract interesting bits"""
-
-    outString=""
-
-    for elem in report.iter():
-        if elem.tag == "{http://purl.oclc.org/dsdl/svrl}failed-assert":
-
-            config.status = "fail"
-
-            # Extract test definition
-            test = elem.get('test')
-            outString += 'Test "' + test + '" failed ('
-
-            # Extract text description from text element
-            for subelem in elem.iter():
-                if subelem.tag == "{http://purl.oclc.org/dsdl/svrl}text":
-                    description = (subelem.text)
-                    outString += description + ")" + config.lineSep
-    return outString
-
-
 def summariseSchematron(report):
     """Return summarized version of Schematron report with only output of
     failed tests"""
@@ -314,12 +293,6 @@ def getBPC(image):
 def processPDF(PDF, verboseFlag, schemas):
     """Process one PDF"""
 
-    # Initialise status (pass/fail)
-    config.status = "pass"
-
-    # Initialise empty text string for error log output
-    ptOutString = ""
-
     # Create output element for this PDF
     pdfElt = etree.Element("file")
 
@@ -362,15 +335,16 @@ def processPDF(PDF, verboseFlag, schemas):
                 mySchema = mSchema
                 schemaMatch = True
 
-    # Get schema as lxml.etree element
-    mySchemaElt = readAsLXMLElt(mySchema)
-
     if not schemaMatch:
-        config.status = "fail"
-        description = "Name of parent directory does not match any schema"
-        ptOutString += description + config.lineSep
+        # TODO: should we quietly ignore this, or report it somewhere?
+        # TODO: use logging for this instead!
+        pass
+
 
     if schemaMatch:
+        # Get schema as lxml.etree element
+        mySchemaElt = readAsLXMLElt(mySchema)
+    
         # Create and fill descriptive elements
         fPathElt = etree.Element("filePath")
         fPathElt.text = PDF
@@ -428,7 +402,6 @@ def processPDF(PDF, verboseFlag, schemas):
                 # Read raw image stream data from xref id
                 xref = propsPDF['xref']
                 stream = doc.xref_stream_raw(xref)
-                noBytesStream = len(stream)
                 im = Image.open(io.BytesIO(stream))
                 im.load()
                 propsStream = {}
@@ -510,9 +483,9 @@ def processPDF(PDF, verboseFlag, schemas):
             report = schematron.validation_report
 
         except Exception:
+            # TODO: use logging for this instead!
             config.status = "fail"
             description = "Schematron validation resulted in an error"
-            ptOutString += description + config.lineSep
 
         # Re-parse Schematron report
         report = etree.fromstring(str(report))
@@ -521,29 +494,19 @@ def processPDF(PDF, verboseFlag, schemas):
             report = summariseSchematron(report)
         # Add to report element
         reportElt.append(report)
+        # Quality check status
+        status = "pass"
+        for elem in report.iter():
+            if elem.tag == "{http://purl.oclc.org/dsdl/svrl}failed-assert":
+                status = "fail"
+                break
+        # Create element for this
+        statusElt = etree.Element("status")
+        statusElt.text = status
         # Add all child elements to PDF element
         pdfElt.append(propertiesElt)
+        pdfElt.append(statusElt)
         pdfElt.append(reportElt)
-
-        # Parse output of Schematron validation and extract
-        # interesting bits
-        try:
-            schOutString = extractSchematron(report)
-            ptOutString += schOutString
-        except Exception:
-            config.status = "fail"
-            description = "Error processing Schematron output"
-            ptOutString += description + config.lineSep
-
-    if config.status == "fail":
-
-        config.fFailed.write(PDF + config.lineSep)
-        config.fFailed.write("*** Schema validation errors:" + config.lineSep)
-        config.fFailed.write(ptOutString)
-        config.fFailed.write("####" + config.lineSep)
-
-    statusLine = PDF + "," + config.status + config.lineSep
-    config.fStatus.write(statusLine)
 
     return pdfElt
 
@@ -606,21 +569,11 @@ def main():
     # Get schema patterns and locations from profile
     schemas = readProfile(profile, schemasDir)
 
-    # Set line separator for output/ log files to OS default
-    config.lineSep = "\n"
-
-    # Open log files for writing (append)
-
-    # File with summary of quality check status (pass/fail) for each image
-    statusLog = os.path.normpath(("{}_status.csv").format(prefixBatch))
-    removeFile(statusLog)
-    config.fStatus = openFileForAppend(statusLog)
-
-    # File that contains detailed results for all images that failed
-    # quality check
-    failedLog = os.path.normpath(("{}_failed.txt").format(prefixBatch))
-    removeFile(failedLog)
-    config.fFailed = openFileForAppend(failedLog)
+    # Summary file with quality check status (pass/fail) and no of pages
+    summaryFile = os.path.normpath(("{}_summary.csv").format(prefixBatch))
+    with open(summaryFile, 'w', newline='', encoding='utf-8') as fSum:
+        writer = csv.writer(fSum)
+        writer.writerow(["file", "status", "noPages"])
 
     listPDFs = getFilesFromTree(batchDir, "pdf")
 
@@ -640,6 +593,11 @@ def main():
         myPDF = os.path.abspath(myPDF)
         pdfResult = processPDF(myPDF, verboseFlag, schemas)
         if len(pdfResult) != 0:
+            noPages = pdfResult.find('properties/noPages').text
+            status = pdfResult.find('status').text
+            with open(summaryFile, 'a', newline='', encoding='utf-8') as fSum:
+                writer = csv.writer(fSum)
+                writer.writerow([myPDF, status, noPages])
             # Convert output to XML and add to output file
             outXML = etree.tostring(pdfResult,
                                     method='xml',
@@ -655,10 +613,6 @@ def main():
 
     with open(fileOut,"ab") as f:
         f.write(xmlFoot.encode('utf-8'))
-
-    # Close output files
-    config.fStatus.close()
-    config.fFailed.close()
 
     # Timing output
     end = time.time()
