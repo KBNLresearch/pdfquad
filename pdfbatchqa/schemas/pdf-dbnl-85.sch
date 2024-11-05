@@ -14,6 +14,12 @@
         <s:assert test="(encryption = 'None')">PDF uses encryption</s:assert>
     </s:rule>
 
+    <!-- Checks at page level -->
+    <s:rule context="/properties/pages/page">
+        <!-- Check on presence of only 1 image for each page -->
+        <s:assert test="(count(image) = 1)">Unexpected number of images on page</s:assert> 
+    </s:rule>
+
     <!-- Checks at PDF object level -->
     <s:rule context="/properties/pages/page/image/pdf">
         <!-- Check on expected filter value for JPEG encoded image data -->
