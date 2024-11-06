@@ -88,7 +88,7 @@ def parseCommandLine():
                               output is split across multiple files")
     parser.add_argument('--prefixout',
                         action="store",
-                        default='bqa',
+                        default='pq',
                         help="prefix of output files")
     parser.add_argument('--verbose',
                         action="store_true",
