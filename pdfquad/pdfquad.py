@@ -276,8 +276,12 @@ def processPDF(PDF, verboseFlag, schemas):
     fPath, fName = os.path.split(PDF)
     parentDir = os.path.basename(fPath)
 
-    # Flag that indicates whether PDF matches with a schema
+    # Initial value of flag that indicates whether PDF passes or fails quality checks
+    status = "pass"
+    # Initial value of flag that indicates schema match
     schemaMatch = False
+    # Initial value of schema reference
+    mySchema = "undefined"
 
     # Select schema based on directory or file name pattern defined in profile
     for schema in schemas:
@@ -310,146 +314,141 @@ def processPDF(PDF, verboseFlag, schemas):
                 mySchema = mSchema
                 schemaMatch = True
 
-    if not schemaMatch:
-        logging.warning("no schema match")
+    # Create and fill descriptive elements
+    fPathElt = etree.Element("filePath")
+    fPathElt.text = PDF
+    fSizeElt = etree.Element("fileSize")
+    fSizeElt.text = str(os.path.getsize(PDF))
+
+    # Create elements to store properties and Schematron report
+    propertiesElt = etree.Element("properties")
+    reportElt = etree.Element("schematronReport")
+
+    # Parse PDF
+    doc = pymupdf.open(PDF)
+
+    # Page count
+    pages = doc.page_count
+    # Document metadata
+    metadata = doc.metadata
+    metadataElt = dictionaryToElt('meta', metadata)
+
+    # Read pageMode from document catalog (if it exists)
+    # pageMode is needed for the thumbnail check
+    catXref = doc.pdf_catalog()
+    pageMode = doc.xref_get_key(catXref, "PageMode")
+    pageModeElt = etree.Element("PageMode")
+    if pageMode[0] == 'null':
+        pageModeElt.text = "undefined"
+    else:
+        pageModeElt.text = pageMode[1]
+
+    # Check for digital signatures
+    signatureFlag = doc.get_sigflags()
+    signatureFlagElt = etree.Element("signatureFlag")
+    signatureFlagElt.text = str(signatureFlag)
+
+    # Wrapper element for pages output
+    pagesElt = etree.Element("pages")
+
+    for page in doc:
+        pageElt = etree.Element("page")
+        images = page.get_images(full=False)
+        for image in images:
+            imageElt = etree.Element("image")
+            # Store PDF object level properties to dictionary
+            propsPDF = {}
+            propsPDF['xref'] = image[0]
+            #propsPDF['smask'] = image[1]
+            propsPDF['width'] = image[2]
+            propsPDF['height'] = image[3]
+            propsPDF['bpc'] = image[4]
+            propsPDF['colorspace'] = image[5]
+            propsPDF['altcolorspace'] = image[6]
+            #propsPDF['name'] = image[7]
+            propsPDF['filter'] = image[8]
+
+            # Read raw image stream data from xref id
+            xref = propsPDF['xref']
+            stream = doc.xref_stream_raw(xref)
+            im = Image.open(io.BytesIO(stream))
+            im.load()
+            propsStream = {}
+            propsStream['format'] = im.format
+            width = im.size[0]
+            height = im.size[1]
+            propsStream['width'] = width
+            propsStream['height'] = height
+            propsStream['mode'] = im.mode
+            noComponents = len(im.getbands())
+            propsStream['components']= noComponents
+            bitsPerComponent = getBPC(im)
+            propsStream['bpc'] = bitsPerComponent
+
+            try:
+                # Estimate JPEG quality using least squares matching against
+                # standard quantization tables
+                quality, rmsError, nse = jpegquality.computeJPEGQuality(im)
+                propsStream['JPEGQuality'] = quality
+                propsStream['NSE_JPEGQuality'] = nse
+            except Exception:
+                pass
+
+            for key, value in im.info.items():
+                if isinstance(value, bytes):
+                    propsStream[key] = 'bytes'
+                elif key == 'dpi' and isinstance(value, tuple):
+                    propsStream['ppi_x'] = value[0]
+                    propsStream['ppi_y'] = value[1]
+                elif key == 'jfif_density' and isinstance(value, tuple):
+                    propsStream['jfif_density_x'] = value[0]
+                    propsStream['jfif_density_y'] = value[1]
+                elif isinstance(value, tuple):
+                    # Skip any other properties that return tuples
+                    pass
+                else:
+                    propsStream[key] = value
+
+            try:
+                # ICC profile name and description
+                icc = im.info['icc_profile']
+                iccProfile = ImageCms.ImageCmsProfile(io.BytesIO(icc))
+                propsStream['icc_profile_name'] = ImageCms.getProfileName(iccProfile).strip()
+                propsStream['icc_profile_description'] = ImageCms.getProfileDescription(iccProfile).strip()
+            except KeyError:
+                pass
+
+            # Dictionaries to element objects
+            propsPDFElt = dictionaryToElt('pdf', propsPDF)
+            propsStreamElt = dictionaryToElt('stream', propsStream)
+            # Add properties to image element
+            imageElt.append(propsPDFElt)
+            imageElt.append(propsStreamElt)
+
+            # Add image element to page element
+            pageElt.append(imageElt)
+
+        # Add page element to pages element
+        pagesElt.append(pageElt)
+
+    # Add all child elements to properties element
+    propertiesElt.append(fPathElt)
+    propertiesElt.append(fSizeElt)
+    propertiesElt.append(metadataElt)
+    propertiesElt.append(pageModeElt)
+    propertiesElt.append(signatureFlagElt)
+    noPagesElt = etree.Element("noPages")
+    noPagesElt.text = str(pages)
+    propertiesElt.append(noPagesElt)
+    propertiesElt.append(pagesElt)
 
     if schemaMatch:
         # Get schema as lxml.etree element
         mySchemaElt = readAsLXMLElt(mySchema)
-    
-        # Create and fill descriptive elements
-        fPathElt = etree.Element("filePath")
-        fPathElt.text = PDF
-        fSizeElt = etree.Element("fileSize")
-        fSizeElt.text = str(os.path.getsize(PDF))
-
-        # Create elements to store properties and Schematron report
-        propertiesElt = etree.Element("properties")
-        reportElt = etree.Element("schematronReport")
-
-        # Parse PDF
-        doc = pymupdf.open(PDF)
-
-        # Page count
-        pages = doc.page_count
-        # Document metadata
-        metadata = doc.metadata
-        metadataElt = dictionaryToElt('meta', metadata)
-
-        # Read pageMode from document catalog (if it exists)
-        # pageMode is needed for the thumbnail check
-        catXref = doc.pdf_catalog()
-        pageMode = doc.xref_get_key(catXref, "PageMode")
-        pageModeElt = etree.Element("PageMode")
-        if pageMode[0] == 'null':
-            pageModeElt.text = "undefined"
-        else:
-            pageModeElt.text = pageMode[1]
-
-        # Check for digital signatures
-        signatureFlag = doc.get_sigflags()
-        signatureFlagElt = etree.Element("signatureFlag")
-        signatureFlagElt.text = str(signatureFlag)
-
-        # Wrapper element for pages output
-        pagesElt = etree.Element("pages")
-
-        for page in doc:
-            pageElt = etree.Element("page")
-            images = page.get_images(full=False)
-            for image in images:
-                imageElt = etree.Element("image")
-                # Store PDF object level properties to dictionary
-                propsPDF = {}
-                propsPDF['xref'] = image[0]
-                #propsPDF['smask'] = image[1]
-                propsPDF['width'] = image[2]
-                propsPDF['height'] = image[3]
-                propsPDF['bpc'] = image[4]
-                propsPDF['colorspace'] = image[5]
-                propsPDF['altcolorspace'] = image[6]
-                #propsPDF['name'] = image[7]
-                propsPDF['filter'] = image[8]
-
-                # Read raw image stream data from xref id
-                xref = propsPDF['xref']
-                stream = doc.xref_stream_raw(xref)
-                im = Image.open(io.BytesIO(stream))
-                im.load()
-                propsStream = {}
-                propsStream['format'] = im.format
-                width = im.size[0]
-                height = im.size[1]
-                propsStream['width'] = width
-                propsStream['height'] = height
-                propsStream['mode'] = im.mode
-                noComponents = len(im.getbands())
-                propsStream['components']= noComponents
-                bitsPerComponent = getBPC(im)
-                propsStream['bpc'] = bitsPerComponent
-
-                try:
-                    # Estimate JPEG quality using least squares matching against
-                    # standard quantization tables
-                    quality, rmsError, nse = jpegquality.computeJPEGQuality(im)
-                    propsStream['JPEGQuality'] = quality
-                    propsStream['NSE_JPEGQuality'] = nse
-                except Exception:
-                    pass
-
-                for key, value in im.info.items():
-                    if isinstance(value, bytes):
-                        propsStream[key] = 'bytes'
-                    elif key == 'dpi' and isinstance(value, tuple):
-                        propsStream['ppi_x'] = value[0]
-                        propsStream['ppi_y'] = value[1]
-                    elif key == 'jfif_density' and isinstance(value, tuple):
-                        propsStream['jfif_density_x'] = value[0]
-                        propsStream['jfif_density_y'] = value[1]
-                    elif isinstance(value, tuple):
-                        # Skip any other properties that return tuples
-                        pass
-                    else:
-                        propsStream[key] = value
-
-                try:
-                    # ICC profile name and description
-                    icc = im.info['icc_profile']
-                    iccProfile = ImageCms.ImageCmsProfile(io.BytesIO(icc))
-                    propsStream['icc_profile_name'] = ImageCms.getProfileName(iccProfile).strip()
-                    propsStream['icc_profile_description'] = ImageCms.getProfileDescription(iccProfile).strip()
-                except KeyError:
-                    pass
-                
-                # Dictionaries to element objects
-                propsPDFElt = dictionaryToElt('pdf', propsPDF)
-                propsStreamElt = dictionaryToElt('stream', propsStream)
-                # Add properties to image element
-                imageElt.append(propsPDFElt)
-                imageElt.append(propsStreamElt)
-
-                # Add image element to page element
-                pageElt.append(imageElt)
-
-            # Add page element to pages element
-            pagesElt.append(pageElt)
-
-        # Add all child elements to properties element
-        propertiesElt.append(fPathElt)
-        propertiesElt.append(fSizeElt)
-        propertiesElt.append(metadataElt)
-        propertiesElt.append(pageModeElt)
-        propertiesElt.append(signatureFlagElt)
-        noPagesElt = etree.Element("noPages")
-        noPagesElt.text = str(pages)
-        propertiesElt.append(noPagesElt)
-        propertiesElt.append(pagesElt)
-
         try:
             # Start Schematron magic ...
             schematron = isoschematron.Schematron(mySchemaElt,
-                                                  store_report=True)
-
+                                                    store_report=True)
             # Validate tools output against schema
             schemaValidationResult = schematron.validate(propertiesElt)
             report = schematron.validation_report
@@ -464,18 +463,25 @@ def processPDF(PDF, verboseFlag, schemas):
             report = summariseSchematron(report)
         # Add to report element
         reportElt.append(report)
-        # Quality check status
-        status = "pass"
         for elem in report.iter():
             if elem.tag == "{http://purl.oclc.org/dsdl/svrl}failed-assert":
                 status = "fail"
                 break
-        # Create element for this
-        statusElt = etree.Element("status")
-        statusElt.text = status
-        # Add all child elements to PDF element
-        pdfElt.append(propertiesElt)
-        pdfElt.append(statusElt)
+    else:
+        # No schema match
+        status = "fail"
+        logging.warning("no schema match")
+
+    # Create schema and status elements
+    schemaElt = etree.Element("schema")
+    schemaElt.text = mySchema
+    statusElt = etree.Element("status")
+    statusElt.text = status
+    # Add all child elements to PDF element
+    pdfElt.append(propertiesElt)
+    pdfElt.append(schemaElt)
+    pdfElt.append(statusElt)
+    if schemaMatch:
         pdfElt.append(reportElt)
 
     return pdfElt
