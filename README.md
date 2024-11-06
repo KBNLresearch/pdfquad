@@ -83,21 +83,20 @@ usage: pdfquad [-h] [--maxpdfs MAXPDFS] [--prefixout PREFIXOUT]
 
 ### Positional arguments
 
-- **profile**: this defines the validation profile file
-
-- **batchDir**: this defines the batch directory that will be analyzed
+|Argument|Description|
+|:--|:--|
+|`profile`|this defines the validation profile file|
+|`batchDir`|this defines the batch directory that will be analyzed|
 
 ### Optional arguments
 
-- **--maxpdfs, -x**: this defines the maximum number of PDFs that are reported in each output XML file (default = 10)
-
-- **--prefixout, -p**: this defines a text prefix on which the names of the output files are based (default = "pq")
-
-- **--outdir, -o**: this defines the directory where output is written (default = current working directory from which pdfquad is launched)
-
-- **--verbose, -b**: this tells pdfquad to report Schematron output in verbose format
-
-- **--version, -v**: this tells pdfquad to show its version number and exit
+|Argument|Description|
+|:--|:--|
+|`--maxpdfs`, `-x`|this defines the maximum number of PDFs that are reported in each output XML file (default = 10)|
+|`--prefixout`, `p`|this defines a text prefix on which the names of the output files are based (default = "pq")|
+|`--outdir`, `-o`|this defines the directory where output is written (default = current working directory from which pdfquad is launched)|
+|`--verbose`, `-b`|this tells pdfquad to report Schematron output in verbose format|
+|`--version`, `-v`|this tells pdfquad to show its version number and exit|
 
 ## Example
 
