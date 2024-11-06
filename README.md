@@ -2,7 +2,7 @@
 
 ## What is pdfquad?
 
-Pdfquad is a simple tool for automated quality assessment of PDF documents in digitisation batches against a user-defined technical profile. It uses [PyMuPDF](https://pymupdf.readthedocs.io/) to parse the PDF file structure and extract some relevant properties. Properties of embedded images extracted using [Pillow](https://pillow.readthedocs.io/).
+Pdfquad is a simple tool for automated quality assessment of PDF documents in digitisation batches against a user-defined technical profile. It uses [PyMuPDF](https://pymupdf.readthedocs.io/) to parse the PDF file structure and extract some relevant properties. Properties of embedded images are extracted using [Pillow](https://pillow.readthedocs.io/).
 
 These properties are serialized to a simple XML structure, which is then evaluated against [Schematron rules](http://en.wikipedia.org/wiki/Schematron) that define the expected/required technical characteristics.
 
