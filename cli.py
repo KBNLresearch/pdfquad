@@ -2,7 +2,7 @@
 #
 """CLI wrapper script, ensures that relative imports work correctly in a PyInstaller build"""
 
-from pdfbatchqa.pdfbatchqa import main
+from pdfquad.pdfquad import main
 
 if __name__ == '__main__':
     main()

@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-"""PDF Automated Quality Assessment Tool for KB digitisation projects
+"""PDF Quality Assessment for Digitisation batches
 
 Johan van der Knijff
 
@@ -279,14 +279,14 @@ def getBPC(image):
 def writeXMLHeader(fileOut):
     """Write XML header"""
     xmlHead = "<?xml version='1.0' encoding='UTF-8'?>\n"
-    xmlHead += "<pdfbatchqa>\n"
+    xmlHead += "<pdfquad>\n"
     with open(fileOut,"wb") as f:
         f.write(xmlHead.encode('utf-8'))
 
 
 def writeXMLFooter(fileOut):
     """Write XML footer"""
-    xmlFoot = "</pdfbatchqa>\n"
+    xmlFoot = "</pdfquad>\n"
     with open(fileOut,"ab") as f:
         f.write(xmlFoot.encode('utf-8'))
 
@@ -517,7 +517,7 @@ def main():
     os.environ.get('LOCALAPPDATA') or
     os.environ.get('XDG_CONFIG_HOME') or
     os.path.join(os.environ['HOME'], '.config'),
-    "pdfbatchqa")
+    "pdfquad")
 
      # Create config directory if it doesn't exist already
     if not os.path.isdir(configpath):
@@ -583,7 +583,7 @@ def main():
 
     # start clock for statistics
     start = time.time()
-    print("pdfbatchqa started: " + time.asctime())
+    print("pdfquad started: " + time.asctime())
 
     # Iterate over all PDFs
     pdfCount = 1
@@ -624,7 +624,7 @@ def main():
     # Timing output
     end = time.time()
 
-    print("pdfbatchqa ended: " + time.asctime())
+    print("pdfquad ended: " + time.asctime())
 
     # Elapsed time (seconds)
     timeElapsed = end - start

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Setup script for pdfbatchqa"""
+"""Setup script for pdfquad"""
 import codecs
 import os
 import re
@@ -29,9 +29,9 @@ README = open('README.md', 'r')
 README_TEXT = README.read()
 README.close()
 
-setup(name='pdfbatchqa',
+setup(name='pdfquad',
       packages=find_packages(),
-      version=find_version('pdfbatchqa', 'pdfbatchqa.py'),
+      version=find_version('pdfquad', 'pdfquad.py'),
       license='LGPL',
       install_requires=INSTALL_REQUIRES,
       python_requires=PYTHON_REQUIRES,
@@ -43,14 +43,14 @@ setup(name='pdfbatchqa',
       author_email='johan.vanderknijff@kb.nl',
       maintainer='Johan van der Knijff',
       maintainer_email='johan.vanderknijff@kb.nl',
-      url='https://github.com/KBNLresearch/pdfbatchqa',
-      download_url='https://github.com/KBNLresearch/pdfbatchqa/archive/' \
-        + find_version('pdfbatchqa', 'pdfbatchqa.py') + '.tar.gz',
-      package_data={'pdfbatchqa': ['*.*',
+      url='https://github.com/KBNLresearch/pdfquad',
+      download_url='https://github.com/KBNLresearch/pdfquad/archive/' \
+        + find_version('pdfquad', 'pdfquad.py') + '.tar.gz',
+      package_data={'pdfquad': ['*.*',
                                 'profiles/*.*',
                                 'schemas/*.*']},
       entry_points={'console_scripts': [
-          'pdfbatchqa = pdfbatchqa.pdfbatchqa:main',
+          'pdfquad = pdfquad.pdfquad:main',
       ]},
       classifiers=[
           'Environment :: Console',
