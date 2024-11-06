@@ -114,7 +114,9 @@ Pdfquad reports the following output:
 
 ### Comprehensive output file (XML)
 
-Pdfquad generates one or more comprehensive output files in XML format. For each PDF, these contain all extracted properties, as well a the Schematron report and the assessment status. Since these files can get really large, Pdfquad splits the results across multiple output files, using the following naming convention:
+Pdfquad generates one or more comprehensive output files in XML format. For each PDF, these contain all extracted properties, as well a the Schematron report and the assessment status. [Here's an example file](./examples/pq_batchtest_001.xml).
+
+Since these files can get really large, Pdfquad splits the results across multiple output files, using the following naming convention:
 
 - pq_mybatch_001.xml
 - pq_mybatch_002.xml
