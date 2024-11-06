@@ -6,7 +6,7 @@
 element links a search pattern to a corresponding schema
 
 - Value for "type" is either "fileName or "parentDirName"
-- Value for "match" is either "is", "startswith" or "endswith"
+- Value for "match" is either "is", "startswith", "endswith" or "contains"
 -->
 
 <schema type="parentDirName" match="endswith" pattern="i-85">pdf-dbnl-85.sch</schema>

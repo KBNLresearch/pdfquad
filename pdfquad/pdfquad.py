@@ -154,7 +154,7 @@ def readProfile(profile, schemasDir):
             errorExit(msg)
         try:
             mMatch = schema.attrib["match"]
-            if mMatch not in ["is", "startswith", "endswith"]:
+            if mMatch not in ["is", "startswith", "endswith", "contains"]:
                 msg = "'{}' is not a valid 'match' value".format(mMatch)
                 errorExit(msg)
         except KeyError:
@@ -310,6 +310,10 @@ def processPDF(PDF, verboseFlag, schemas):
             if parentDir.endswith(mPattern):
                 mySchema = mSchema
                 schemaMatch = True
+        elif mType == "parentDirName" and mMatch == "contains":
+            if mPattern in parentDir:
+                mySchema = mSchema
+                schemaMatch = True
         if mType == "fileName" and mMatch == "is":
             if fName == mPattern:
                 mySchema = mSchema
@@ -320,6 +324,10 @@ def processPDF(PDF, verboseFlag, schemas):
                 schemaMatch = True
         elif mType == "fileName" and mMatch == "endswith":
             if fName.endswith(mPattern):
+                mySchema = mSchema
+                schemaMatch = True
+        elif mType == "fileName" and mMatch == "contains":
+            if mPattern in fName:
                 mySchema = mSchema
                 schemaMatch = True
 

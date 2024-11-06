@@ -1,59 +1,97 @@
-# Pdfquad
+# PDF QUality Assessment for Digitisation batches
 
-## What is *pdfquad*?
+## What is pdfquad?
 
-*pdfquad* is a simple tool for automated checking of digitisation batches of *PDF* files against a user-defined technical profile. Internally it wraps around the *pdfimages* tool from the [*Poppler*](https://en.wikipedia.org/wiki/Poppler_(software)) library, which is used to extract the image-related properties for each PDF. The *pdfimages* output is then validated against a set of [*Schematron*](http://en.wikipedia.org/wiki/Schematron) schemas that define the required technical characteristics.
+Pdfquad is a simple tool for automated quality assessment of PDF documents in digitisation batches against a user-defined technical profile. It uses [PyMuPDF](https://pymupdf.readthedocs.io/) to parse the PDF file structure and extract some relevant properties. Properties of embedded images extracted using [Pillow](https://pillow.readthedocs.io/).
 
-## Dependencies
-
-Internally the software wraps around the following tools, which have to be installed first.
-
-### Poppler-utils
-
-On Linux (Ubuntu/Debian), you can install these using:
-
-```
-sudo apt install poppler-utils
-```
-
-On Windows, download and install compiled binaries that are available here (TODO: add link + instructions).
-
-### ExifTool
-
-On Linux (Ubuntu/Debian), install using:
-
-```
-sudo apt install libimage-exiftool-perl
-```
-
-On Windows, download the latest 64-bit Windows binaries from the [ExifTool website](https://exiftool.org/). Extract the contents of the ZIP file to a new directory (e.g. `C:\exiftool\`), and rename the file `exiftool(-k).exe` to `exiftool.exe`.
+These properties are serialized to a simple XML structure, which is then evaluated against [Schematron rules](http://en.wikipedia.org/wiki/Schematron) that define the expected/required technical characteristics.
 
 ## Installation
 
-The easiest method to install *pdfquad* is to use the [*pip* package manager](https://en.wikipedia.org/wiki/Pip_(package_manager)).
-
-
-## Installation with pip (single user)
-
-This will work on any platform for which Python is available. You need a recent version of *pip* (version 9.0 or more recent). To install *pdfquad* for a single user, use the following command:
-
-```
-pip install pdfquad --user
-```
-
-## Installation with pip (all users)
-
-To install *pdfquad* for *all* users, use the following command:
+Install the software with the [pip package manager](https://en.wikipedia.org/wiki/Pip_(package_manager)):
 
 ```
 pip install pdfquad
 ```
 
-You need local admin (Windows) / superuser (Linux) privilige to do this. On Windows, you can do this by running the above command in a Command Prompt window that was opened as Administrator. On Linux, use this:
+Then run pdfquad once:
 
 ```
-sudo pip install pdfquad
+pdfquad
 ```
+
+Depending on your system, pdfquad will create a folder named `pdfquad` in one of the following locations: 
+
+- For Linux, it will use the location defined by environment variable `$XDG_CONFIG_HOME`. If this variable is not set, it will use the `.config` directory in the user's home folder (e.g. `/home/johan/.config/pdfquad`). Note that the `.config` directory is hidden by default.
+- For Windows, it will use the `AppData\Local` folder (e.g. `C:\Users\johan\AppData\Local\pdfquad`).
+
+The folder contains two subdirectories named `profiles` and `schemas`, which is explained below.
+
+## Profiles
+
+A profile is an XML file that defines how a digitisation batch is evaluated. It is made up of one or more `schema` elements that each link a file or directory naming pattern to a Schematron file. Here's an example:
+
+```xml
+<?xml version="1.0"?>
+
+<profile>
+
+<!-- Profile for DBNL fulltext digitization batches. Each "schema"
+element links a search pattern to a corresponding schema
+
+- Value for "type" is either "fileName or "parentDirName"
+- Value for "match" is either "is", "startswith" or "endswith"
+-->
+
+<schema type="parentDirName" match="endswith" pattern="i-85">pdf-dbnl-85.sch</schema>
+<schema type="parentDirName" match="endswith" pattern="i-50">pdf-dbnl-50.sch</schema>
+
+</profile>
+```
+
+Here we see two `schema` elements. Each element refers to a Schematron file (explained in the next section). The values of the `type`, `match` and `pattern` attributes define how this file is linked to file or directory names inside the batch:
+
+- If **type** is "fileName", the matching is based on the naming of a PDF. In case of "parentDirName" the matching uses the naming of the direct parent directory of a PDF.
+- The **match** attribute defines whether 
+
+
+
+## Command-line syntax
+
+The syntax of pdfquad is as follows:
+
+```
+usage: pdfquad [-h] [--maxpdfs MAXPDFS] [--prefixout PREFIXOUT]
+               [--outdir OUTDIR] [--verbose] [--version]
+               profile batchDir
+```
+
+### Positional arguments
+
+- **profile**: this defines the validation profile file
+
+- **batchDir**: this defines the batch directory that will be analyzed
+
+### Optional arguments
+
+- **--maxpdfs, -x**: this defines the maximum number of PDFs that are reported in each output XML file (default = 10)
+
+- **--prefixout, -p**: this defines a text prefix on which the names of the output files are based (default = "pq")
+
+- **--outdir, -o**: this defines the directory where output is written (default = current working directory from which pdfquad is launched)
+
+- **--verbose, -b**: this tells pdfquad to report Schematron output in verbose format
+
+- **--version, -v**: this tells pdfquad to show its version number and exit
+
+## Example
+
+So in the simplest case we can call *pdfquad* with the the batch directory as the only argument:
+
+```
+pdfbatch ./mybatch
+```
+
 
 ## Configuration
 
@@ -101,40 +139,6 @@ exiftool = C:\exiftool\exiftool.exe # exiftool executable
 
 You will most likely need to modify the file paths to pdfimages, pdfinfo and exiftool according to the specific version and installation location on your system (unlike Linux, Windows has no standardized paths to executables).
 
-## Command-line syntax
-
-```
-usage: pdfquad [-h] [--prefixout PREFIXOUT] [--profile PROFILE]
-              [--pdfimages PDFIMAGES] [--pdfinfo PDFINFO]
-              [--exiftool EXIFTOOL] [--version]
-              batchDir
-```
-
-### Positional arguments
-
-**batchDir**: root directory of batch
-
-### Optional arguments
-
-**--prefixout**: prefix that is used for writing output files
-
-**--profile**: name of profile that defines the validation schemas (to list all available profiles, use a value of *l* or *list* for *PROFILE*)
-
-**--pdfimages**: path to *pdfimages* executable
-
-**--pdfinfo**: path to *pdfinfo* executable
-
-**--exiftool**: path to *exiftool* executable
-
-If no values are provided on the command line for *--prefixout*, *--profile*, *--pdfimages*, *--pdfinfo* or *--exiftool*, *pdfquad* uses the values that are defined in the configuration file.
-
-### Example
-
-So in the simplest case we can call *pdfquad* with the the batch directory as the only argument:
-
-```
-pdfbatch ./mybatch
-```
 
 ## Batch structure
 
