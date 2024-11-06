@@ -36,14 +36,14 @@ def errorExit(msg):
 def checkFileExists(fileIn):
     """Check if file exists and exit if not"""
     if not os.path.isfile(fileIn):
-        msg = "{} does not exist".format(fileIn)
+        msg = "file {} does not exist".format(fileIn)
         errorExit(msg)
 
 
 def checkDirExists(pathIn):
     """Check if directory exists and exit if not"""
     if not os.path.isdir(pathIn):
-        msg = "{} does not exist".format(pathIn) 
+        msg = "directory {} does not exist".format(pathIn)
         errorExit(msg)
 
 
@@ -80,16 +80,20 @@ def parseCommandLine():
     parser.add_argument('batchDir',
                         action="store",
                         help="batch directory")
-    parser.add_argument('--maxpdfs',
+    parser.add_argument('--maxpdfs', '-x',
                         action="store",
                         default=10,
                         help="maximum number of reported PDFs per output file; for larger numbers \
                               output is split across multiple files")
-    parser.add_argument('--prefixout',
+    parser.add_argument('--prefixout', '-p',
                         action="store",
                         default='pq',
                         help="prefix of output files")
-    parser.add_argument('--verbose',
+    parser.add_argument('--outdir', '-o',
+                        action="store",
+                        default=os.getcwd(),
+                        help="output directory")
+    parser.add_argument('--verbose', '-b',
                         action="store_true",
                         default=False,
                         help="report Schematron report in verbose format")
@@ -101,7 +105,12 @@ def parseCommandLine():
     args = parser.parse_args()
 
     # Normalise all file paths
+    args.profile = os.path.normpath(args.profile)
     args.batchDir = os.path.normpath(args.batchDir)
+    args.outdir = os.path.normpath(args.outdir)
+
+    # Convert maxpdfs to integer
+    args.maxpdfs = int(args.maxpdfs)
 
     return args
 
@@ -524,27 +533,31 @@ def main():
 
     # Get input from command line
     args = parseCommandLine()
-
+    profile = args.profile
     batchDir = args.batchDir
     prefixOut = args.prefixout
+    outDir = args.outdir
+    maxPDFs = args.maxpdfs
+    verboseFlag = args.verbose
+
+    # Check if files / directories exist
+    checkFileExists(profile)
+    checkDirExists(batchDir)
+    checkDirExists(outDir)
+
+    # Check if outDir is writable
+    if not os.access(outDir, os.W_OK):
+        msg = ("directory {} is not writable".format(outDir))
+        errorExit(msg)
 
     # Batch dir name
     batchDirName = os.path.basename(batchDir)
-
     # Construct output prefix for this batch
     prefixBatch = ("{}_{}").format(prefixOut, batchDirName)
-    profile = args.profile
-    profile = os.path.join(profilesDir, profile)
-    checkFileExists(profile)
-
-    # This option sets a limit on the number of PDFs that is reported for each XML
-    # output file
-    maxPDFs = int(args.maxpdfs)
-
-    verboseFlag = args.verbose
-
+    
     # Set up logging
     logFile = os.path.normpath(("{}.log").format(prefixBatch))
+    logFile = os.path.join(outDir, logFile)
     logging.basicConfig(handlers=[logging.FileHandler(logFile, 'a', 'utf-8')],
                         level=logging.INFO,
                         format='%(asctime)s - %(levelname)s - %(message)s')
@@ -554,12 +567,12 @@ def main():
 
     # Summary file with quality check status (pass/fail) and no of pages
     summaryFile = os.path.normpath(("{}_summary.csv").format(prefixBatch))
+    summaryFile = os.path.join(outDir, summaryFile)
     with open(summaryFile, 'w', newline='', encoding='utf-8') as fSum:
         writer = csv.writer(fSum)
         writer.writerow(["file", "status", "noPages", "fileOut"])
 
     listPDFs = getFilesFromTree(batchDir, "pdf")
-
 
     # start clock for statistics
     start = time.time()
@@ -569,6 +582,7 @@ def main():
     pdfCount = 1
     outFileCount = 1
     fileOut = ("{}_{}.xml").format(prefixBatch, str(outFileCount).zfill(3))
+    fileOut = os.path.join(outDir, fileOut)
     writeXMLHeader(fileOut)
 
     for myPDF in listPDFs:
@@ -577,6 +591,7 @@ def main():
             writeXMLFooter(fileOut)
             outFileCount += 1
             fileOut = ("{}_{}.xml").format(prefixBatch, str(outFileCount).zfill(3))
+            fileOut = os.path.join(outDir, fileOut)
             writeXMLHeader(fileOut)
             pdfCount = 1
         myPDF = os.path.abspath(myPDF)
@@ -596,7 +611,7 @@ def main():
 
             with open(fileOut,"ab") as f:
                 f.write(outXML)
-            
+
             pdfCount += 1
 
     writeXMLFooter(fileOut)
