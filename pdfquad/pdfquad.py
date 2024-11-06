@@ -22,7 +22,6 @@ import pymupdf
 from PIL import Image
 from PIL import ImageCms
 from . import jpegquality
-from . import config
 
 __version__ = "0.1.0"
 
