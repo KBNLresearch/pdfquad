@@ -43,8 +43,8 @@ element links a search pattern to a corresponding schema
 - Value for "match" is either "is", "startswith" or "endswith"
 -->
 
-<schema type="parentDirName" match="endswith" pattern="i-85">pdf-dbnl-85.sch</schema>
-<schema type="parentDirName" match="endswith" pattern="i-50">pdf-dbnl-50.sch</schema>
+<schema type="parentDirName" match="endswith" pattern="pi-85">pdf-dbnl-85.sch</schema>
+<schema type="parentDirName" match="endswith" pattern="pi-50">pdf-dbnl-50.sch</schema>
 
 </profile>
 ```
@@ -52,7 +52,7 @@ element links a search pattern to a corresponding schema
 Here we see two `schema` elements. Each element refers to a Schematron file (explained in the next section). The values of the `type`, `match` and `pattern` attributes define how this file is linked to file or directory names inside the batch:
 
 - If **type** is "fileName", the matching is based on the naming of a PDF. In case of "parentDirName" the matching uses the naming of the direct parent directory of a PDF.
-- The **match** attribute defines whether 
+- The **match** attribute defines whether the matching pattern with the file or directory name is exact ("is") or partial ("startswith", "endswith", "contains".) 
 
 
 
