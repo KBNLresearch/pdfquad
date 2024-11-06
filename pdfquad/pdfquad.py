@@ -204,31 +204,6 @@ def getFilesFromTree(rootDir, extensionString):
     return filesList
 
 
-def getPathComponentsAsList(path):
-    """Returns a list that contains all path components (dir names) in path
-    Adapted from:
-    http://stackoverflow.com/questions/3167154/how-to-split-a-dos-path-into-its-components-in-python
-    """
-
-    drive, path_and_file = os.path.splitdrive(path)
-    pathComponent, fileComponent = os.path.split(path_and_file)
-
-    folders = []
-    while 1:
-        pathComponent, folder = os.path.split(pathComponent)
-
-        if folder != "":
-            folders.append(folder)
-        else:
-            if pathComponent != "":
-                folders.append(pathComponent)
-
-            break
-
-    folders.reverse()
-    return(folders, fileComponent)
-
-
 def summariseSchematron(report):
     """Return summarized version of Schematron report with only output of
     failed tests"""
@@ -296,10 +271,10 @@ def processPDF(PDF, verboseFlag, schemas):
     # Create output element for this PDF
     pdfElt = etree.Element("file")
 
-    # Create list that contains all file path components (dir names)
-    pathComponents, fName = getPathComponentsAsList(PDF)
-    # Direct parent dir name
-    parentDir = pathComponents[-1]
+    # File name and parent directory name for this PDF
+
+    fPath, fName = os.path.split(PDF)
+    parentDir = os.path.basename(fPath)
 
     # Flag that indicates whether PDF matches with a schema
     schemaMatch = False
