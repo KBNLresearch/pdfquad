@@ -22,7 +22,7 @@ def find_version(*file_paths):
 INSTALL_REQUIRES = ['setuptools',
                     'lxml', 
                     'pillow>=9.0.0',
-                    'pymupdf>=1.24.0']
+                    'pymupdf>=1.24.3']
 PYTHON_REQUIRES = '>=3.8, <4'
 
 README = open('README.md', 'r')
