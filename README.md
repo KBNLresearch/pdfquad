@@ -84,14 +84,14 @@ usage: pdfquad [-h] [--maxpdfs MAXPDFS] [--prefixout PREFIXOUT]
 ### Positional arguments
 
 |Argument|Description|
-|:--|:--|
+|:-----|:--|
 |`profile`|this defines the validation profile file|
 |`batchDir`|this defines the batch directory that will be analyzed|
 
 ### Optional arguments
 
 |Argument|Description|
-|:--|:--|
+|:-----|:--|
 |`--maxpdfs`, `-x`|this defines the maximum number of PDFs that are reported in each output XML file (default = 10)|
 |`--prefixout`, `p`|this defines a text prefix on which the names of the output files are based (default = "pq")|
 |`--outdir`, `-o`|this defines the directory where output is written (default = current working directory from which pdfquad is launched)|
