@@ -9,8 +9,8 @@
 
 # Repository: this is usually pypi; for testing use testpypi
 # The corresponding repository URLS are defined in config file ~/.pypirc
-#repository=testpypi
-repository=pypi
+repository=testpypi
+#repository=pypi
 
 # Working directory
 workDir=$PWD
@@ -28,7 +28,7 @@ python3 setup.py sdist bdist_wheel --universal
 
 # Upload package if wheel build was successful; if not show error message
 if [ $? -eq 0 ]; then
-    twine upload --repository $repository  dist/*
+    twine upload --repository $repository dist/*
 else
     echo "Wheel build not successful quitting now ..."
 fi

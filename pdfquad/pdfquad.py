@@ -23,7 +23,7 @@ from PIL import Image
 from PIL import ImageCms
 from . import jpegquality
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 
 def errorExit(msg):
