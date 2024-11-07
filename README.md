@@ -25,51 +25,7 @@ Depending on your system, pdfquad will create a folder named `pdfquad` in one of
 - For Linux, it will use the location defined by environment variable `$XDG_CONFIG_HOME`. If this variable is not set, it will use the `.config` directory in the user's home folder (e.g. `/home/johan/.config/pdfquad`). Note that the `.config` directory is hidden by default.
 - For Windows, it will use the `AppData\Local` folder (e.g. `C:\Users\johan\AppData\Local\pdfquad`).
 
-The folder contains two subdirectories named `profiles` and `schemas`, which is explained below.
-
-## Profiles directory
-
-A profile is an XML file that defines how a digitisation batch is evaluated. It is made up of one or more `schema` elements, that each link a file or directory naming pattern to a Schematron file. Here's an example:
-
-```xml
-<?xml version="1.0"?>
-
-<profile>
-
-<schema type="parentDirName" match="endswith" pattern="pi-85">pdf-dbnl-85.sch</schema>
-<schema type="parentDirName" match="endswith" pattern="pi-50">pdf-dbnl-50.sch</schema>
-
-</profile>
-```
-
-Here we see two `schema` elements. Each element refers to a Schematron file (explained in the next section). The values of the `type`, `match` and `pattern` attributes define how this file is linked to file or directory names inside the batch:
-
-- If **type** is "fileName", the matching is based on the naming of a PDF. In case of "parentDirName" the matching uses the naming of the direct parent directory of a PDF.
-- The **match** attribute defines whether the matching pattern with the file or directory name is exact ("is") or partial ("startswith", "endswith", "contains".)
-- The **pattern** attribute defines a text string that is used for the match.
-
-In the example above, the profile says that if a PDF has a direct parent directory whose name ends with "pi-85", pdfquad should use Schematron file "pdf-dbnl-85.sch". If the directory name ends with "pi-50", it should use "pdf-dbnl-50.sch".
-
-## Available profiles
-
-Currently the following profiles are included:
-
-|Profile|Description|
-|:--|:--|
-|dbnl-fulltext.xml|Profile for DBNL fulltext digitization batches|
-
-## Schemas directory
-
-The directory contains Schematron files that define the rules on which the quality assessment is based. Some background information about this type of rule-based validation can be found in [this blog post](https://www.bitsgalore.org/2012/09/04/automated-assessment-jp2-against-technical-profile).
-
-## Available schemas
-
-Currently the following schemas are included:
-
-|Schema|Description|
-|:--|:--|
-|pdf-dbnl-50.sch|Schema for small access PDFs with 50% quality JPEG compression.|
-|pdf-dbnl-85.sch|Schema for production master PDFs  with 85% quality JPEG compression.|
+The folder contains two subdirectories named `profiles` and `schemas`, which are explained in the "Profiles" and "Schemas" sections below.
 
 ## Command-line syntax
 
@@ -83,8 +39,8 @@ Pdfquad has two sub-commands:
 
 |Command|Description|
 |:-----|:--|
-|`process`|process a batch.|
-|`list`|list available profiles and schemas.|
+|`process`|Process a batch.|
+|`list`|List available profiles and schemas.|
 
 ### process command
 
@@ -100,17 +56,17 @@ The `process` command expects the following positional arguments:
 
 |Argument|Description|
 |:-----|:--|
-|`profile`|this defines the validation profile. Note that any file paths entered here will be ignored, as Pdfquad only accepts  profiles from the profiles directory. You can just enter the file name without the path. Use the `list` command to list all available profiles.|
-|`batchDir`|this defines the batch directory that will be analyzed.|
+|`profile`|This defines the validation profile. Note that any file paths entered here will be ignored, as Pdfquad only accepts  profiles from the profiles directory. You can just enter the file name without the path. Use the `list` command to list all available profiles.|
+|`batchDir`|This defines the batch directory that will be analyzed.|
 
 In addition, the following optional arguments are available:
 
 |Argument|Description|
 |:-----|:--|
-|`--maxpdfs`, `-x`|this defines the maximum number of PDFs that are reported in each output XML file (default: 10).|
-|`--prefixout`, `p`|this defines a text prefix on which the names of the output files are based (default: "pq").|
-|`--outdir`, `-o`|this defines the directory where output is written (default: current working directory from which pdfquad is launched).|
-|`--verbose`, `-b`|this tells pdfquad to report Schematron output in verbose format.|
+|`--maxpdfs`, `-x`|This defines the maximum number of PDFs that are reported in each output XML file (default: 10).|
+|`--prefixout`, `p`|This defines a text prefix on which the names of the output files are based (default: "pq").|
+|`--outdir`, `-o`|This defines the directory where output is written (default: current working directory from which pdfquad is launched).|
+|`--verbose`, `-b`|This tells pdfquad to report Schematron output in verbose format.|
 
 In the simplest case, we can call pdfquad with the profile and the batch directory as the only arguments:
 
@@ -138,6 +94,81 @@ Available schemas (directory /home/johan/.config/pdfquad/schemas):
   - pdf-dbnl-50.sch
 ```
 
+## Profiles
+
+A profile is an XML file that defines how a digitisation batch is evaluated. It is made up of one or more `schema` elements, that each link a file or directory naming pattern to a Schematron file. Here's an example:
+
+```xml
+<?xml version="1.0"?>
+
+<profile>
+
+<schema type="parentDirName" match="endswith" pattern="pi-85">pdf-dbnl-85.sch</schema>
+<schema type="parentDirName" match="endswith" pattern="pi-50">pdf-dbnl-50.sch</schema>
+
+</profile>
+```
+
+Here we see two `schema` elements. Each element refers to a Schematron file (explained in the next section). The values of the `type`, `match` and `pattern` attributes define how this file is linked to file or directory names inside the batch:
+
+- If **type** is "fileName", the matching is based on the naming of a PDF. In case of "parentDirName" the matching uses the naming of the direct parent directory of a PDF.
+- The **match** attribute defines whether the matching pattern with the file or directory name is exact ("is") or partial ("startswith", "endswith", "contains".)
+- The **pattern** attribute defines a text string that is used for the match.
+
+In the example above, the profile says that if a PDF has a direct parent directory whose name ends with "pi-85", pdfquad should use Schematron file "pdf-dbnl-85.sch". If the directory name ends with "pi-50", it should use "pdf-dbnl-50.sch".
+
+### Available profiles
+
+Currently the following profiles are included:
+
+|Profile|Description|
+|:--|:--|
+|dbnl-fulltext.xml|Profile for DBNL full-text digitisation batches.|
+
+## Schemas
+
+Schemas contain the Schematron rules on which the quality assessment is based. Some background information about this type of rule-based validation can be found in [this blog post](https://www.bitsgalore.org/2012/09/04/automated-assessment-jp2-against-technical-profile). Currently the following schemas are included:
+
+### pdf-dbnl-85.sch
+
+This is a schema for production master PDFs with images in JPEG format that are compressed at 85% quality. It includes the following checks:
+
+|Check|Value|
+|:---|:---|
+|PDF version|1.7|
+|Encryption|No encryption|
+|Images per page|1|
+|Filter value of image XObject|DCTDecode|
+|Image stream format|JPEG|
+|Image stream resolution (ppi)|\[299, 301\]|
+|Image stream color components|3|
+|Image stream JPEG Quality||\[83, 87\]|
+|ICC profile|Defined as either PDF object, or embedded in image stream|
+|Width, height|Image XObject values and image stream values are identical|
+|Bits per component|Image XObject values and image stream values are identical|
+|PageMode|Value is not /UseThumbs (no thumbnails allowed)|
+|Digital signatures|Document does not contain digital signatures|
+
+### pdf-dbnl-50.sch
+
+This is a schema for small access PDFs with images in JPEG format that are compressed at 50% quality. It includes the following checks:
+
+|Check|Value|
+|:---|:---|
+|PDF version|1.7|
+|Encryption|No encryption|
+|Images per page|1|
+|Filter value of image XObject|DCTDecode|
+|Image stream format|JPEG|
+|Image stream resolution (ppi)|\[299, 301\]|
+|Image stream color components|3|
+|Image stream JPEG Quality||\[48, 52\]|
+|ICC profile|Defined as either PDF object, or embedded in image stream|
+|Width, height|Image XObject values and image stream values are identical|
+|Bits per component|Image XObject values and image stream values are identical|
+|PageMode|Value is not /UseThumbs (no thumbnails allowed)|
+|Digital signatures|Document does not contain digital signatures|
+
 ## Output
 
 Pdfquad reports the following output:
@@ -164,10 +195,10 @@ This is a comma-delimited text file with, for each PDF, the following columns:
 
 |Column|Description|
 |:-----|:--|
-|file|full path to the PDF file.|
+|file|Full path to the PDF file.|
 |validationSuccess|Flag with value `True` if Schematron validation was succesful, and `False` if not. A value `False` indicates that the file could not be validated (e.g. because no matching schema was found, or the validation resulted in an unexpected exception)|
 |validationOutcome|The outcome of the Schematron validation/assessment. Value is `pass` if file passed all tests, and `fail` otherwise. Note that it is automatically set to "false" if the Schematron validation was unsuccessful (i.e. "validationSuccess" is `False`|
-|noPages|Number of pages in document.|
+|noPages|The number of pages in the document.|
 |fileOut|Corresponding comprehensive output file with full output for this PDF.|
 
 Here's an example:
@@ -183,6 +214,10 @@ file,validationSuccess,validationOutcome,noPages,fileOut
 /home/johan/kb/digitalisering/pdf-qa/test-batches/mybatch/20241105/_boe012192401/300dpi-85/_boe012192401_01.pdf,True,pass,346,/home/johan/kb/digitalisering/pdf-qa/test-batches/pq_mybatch_001.xml
 /home/johan/kb/digitalisering/pdf-qa/test-batches/mybatch/20241105/_boe012192401/300dpi-50/_boe012192401_01.pdf,True,fail,346,/home/johan/kb/digitalisering/pdf-qa/test-batches/pq_mybatch_001.xml
 ```
+
+### Log file
+
+Finally Pdfquad writes a log (.log) file. This is mainly included for development, and may be removed in future versions.
 
 ## Licensing
 
