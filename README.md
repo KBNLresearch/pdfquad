@@ -205,14 +205,14 @@ Here's an example:
 
 ``` csv
 file,validationSuccess,validationOutcome,noPages,fileOut
-/home/johan/kb/digitalisering/pdf-qa/test-batches/mybatch/20241106/anbe001lexi02/300dpi-85/anbe001lexi02_01.pdf,True,pass,1528,/home/johan/kb/digitalisering/pdf-qa/test-batches/pq_mybatch_001.xml
-/home/johan/kb/digitalisering/pdf-qa/test-batches/mybatch/20241106/anbe001lexi02/300dpi-50/anbe001lexi02_01.pdf,True,fail,1528,/home/johan/kb/digitalisering/pdf-qa/test-batches/pq_mybatch_001.xml
-/home/johan/kb/digitalisering/pdf-qa/test-batches/mybatch/20241106/brin003196603/300dpi-85/brin003196603_01.pdf,True,fail,1260,/home/johan/kb/digitalisering/pdf-qa/test-batches/pq_mybatch_001.xml
-/home/johan/kb/digitalisering/pdf-qa/test-batches/mybatch/20241106/brin003196603/300dpi-50/brin003196603_01.pdf,True,fail,1260,/home/johan/kb/digitalisering/pdf-qa/test-batches/pq_mybatch_001.xml
-/home/johan/kb/digitalisering/pdf-qa/test-batches/mybatch/20241105/_deu002201201/300dpi-85/_deu002201201_01.pdf,True,fail,297,/home/johan/kb/digitalisering/pdf-qa/test-batches/pq_mybatch_001.xml
-/home/johan/kb/digitalisering/pdf-qa/test-batches/mybatch/20241105/_deu002201201/300dpi-50/_deu002201201_01.pdf,True,fail,297,/home/johan/kb/digitalisering/pdf-qa/test-batches/pq_mybatch_001.xml
-/home/johan/kb/digitalisering/pdf-qa/test-batches/mybatch/20241105/_boe012192401/300dpi-85/_boe012192401_01.pdf,True,pass,346,/home/johan/kb/digitalisering/pdf-qa/test-batches/pq_mybatch_001.xml
-/home/johan/kb/digitalisering/pdf-qa/test-batches/mybatch/20241105/_boe012192401/300dpi-50/_boe012192401_01.pdf,True,fail,346,/home/johan/kb/digitalisering/pdf-qa/test-batches/pq_mybatch_001.xml
+/home/johan/pdfquad-test/mybatch/20241106/anbe001lexi02/300dpi-85/anbe001lexi02_01.pdf,True,pass,1528,/home/johan/pdfquad-test/pq_mybatch_001.xml
+/home/johan/pdfquad-test/mybatch/20241106/anbe001lexi02/300dpi-50/anbe001lexi02_01.pdf,True,fail,1528,/home/johan/pdfquad-test/pq_mybatch_001.xml
+/home/johan/pdfquad-test/mybatch/20241106/brin003196603/300dpi-85/brin003196603_01.pdf,True,fail,1260,/home/johan/pdfquad-test/pq_mybatch_001.xml
+/home/johan/pdfquad-test/mybatch/20241106/brin003196603/300dpi-50/brin003196603_01.pdf,True,fail,1260,/home/johan/pdfquad-test/pq_mybatch_001.xml
+/home/johan/pdfquad-test/mybatch/20241105/_deu002201201/300dpi-85/_deu002201201_01.pdf,True,fail,297,/home/johan/pdfquad-test/pq_mybatch_001.xml
+/home/johan/pdfquad-test/mybatch/20241105/_deu002201201/300dpi-50/_deu002201201_01.pdf,True,fail,297,/home/johan/pdfquad-test/pq_mybatch_001.xml
+/home/johan/pdfquad-test/mybatch/20241105/_boe012192401/300dpi-85/_boe012192401_01.pdf,True,pass,346,/home/johan/pdfquad-test/pq_mybatch_001.xml
+/home/johan/pdfquad-test/mybatch/20241105/_boe012192401/300dpi-50/_boe012192401_01.pdf,True,fail,346,/home/johan/pdfquad-test/pq_mybatch_001.xml
 ```
 
 ### Log file
