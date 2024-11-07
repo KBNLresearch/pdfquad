@@ -160,18 +160,28 @@ pdfquad process dbnl-fulltext.xml ./mybatch -x 1
 
 ### Summary file (CSV)
 
-This is a comma-delimited text file with, for each PDF, the assessment status, the number of pages, and a reference to its corresponding comprehensive output file. As an example:
+This is a comma-delimited text file with, for each PDF, the following columns:
+
+|Column|Description|
+|:-----|:--|
+|file|full path to the PDF file.|
+|validationSuccess|Flag with value `True` if Schematron validation was succesful, and `False` if not. A value `False` indicates that the file could not be validated (e.g. because no matching schema was found, or the validation resulted in an unexpected exception)|
+|validationOutcome|The outcome of the Schematron validation/assessment. Value is `pass` if file passed all tests, and `fail` otherwise. Note that it is automatically set to "false" if the Schematron validation was unsuccessful (i.e. "validationSuccess" is `False`|
+|noPages|Number of pages in document.|
+|fileOut|Corresponding comprehensive output file with full output for this PDF.|
+
+Here's an example:
 
 ``` csv
-file,status,noPages,fileOut
-/home/johan/test-batches/mybatch/20241106/anbe001lexi02/300dpi-85/anbe001lexi02_01.pdf,pass,1528,/home/johan/test-batches/pq_mybatch_001.xml
-/home/johan/test-batches/mybatch/20241106/anbe001lexi02/300dpi-50/anbe001lexi02_01.pdf,fail,1528,/home/johan/test-batches/pq_mybatch_001.xml
-/home/johan/test-batches/mybatch/20241106/brin003196603/300dpi-85/brin003196603_01.pdf,fail,1260,/home/johan/test-batches/pq_mybatch_001.xml
-/home/johan/test-batches/mybatch/20241106/brin003196603/300dpi-50/brin003196603_01.pdf,fail,1260,/home/johan/test-batches/pq_mybatch_001.xml
-/home/johan/test-batches/mybatch/20241105/_deu002201201/300dpi-85/_deu002201201_01.pdf,fail,297,/home/johan/test-batches/pq_mybatch_001.xml
-/home/johan/test-batches/mybatch/20241105/_deu002201201/300dpi-50/_deu002201201_01.pdf,fail,297,/home/johan/test-batches/pq_mybatch_001.xml
-/home/johan/test-batches/mybatch/20241105/_boe012192401/300dpi-85/_boe012192401_01.pdf,pass,346,/home/johan/test-batches/pq_mybatch_001.xml
-/home/johan/test-batches/mybatch/20241105/_boe012192401/300dpi-50/_boe012192401_01.pdf,fail,346,/home/johan/test-batches/pq_mybatch_001.xml
+file,validationSuccess,validationOutcome,noPages,fileOut
+/home/johan/kb/digitalisering/pdf-qa/test-batches/mybatch/20241106/anbe001lexi02/300dpi-85/anbe001lexi02_01.pdf,True,pass,1528,/home/johan/kb/digitalisering/pdf-qa/test-batches/pq_mybatch_001.xml
+/home/johan/kb/digitalisering/pdf-qa/test-batches/mybatch/20241106/anbe001lexi02/300dpi-50/anbe001lexi02_01.pdf,True,fail,1528,/home/johan/kb/digitalisering/pdf-qa/test-batches/pq_mybatch_001.xml
+/home/johan/kb/digitalisering/pdf-qa/test-batches/mybatch/20241106/brin003196603/300dpi-85/brin003196603_01.pdf,True,fail,1260,/home/johan/kb/digitalisering/pdf-qa/test-batches/pq_mybatch_001.xml
+/home/johan/kb/digitalisering/pdf-qa/test-batches/mybatch/20241106/brin003196603/300dpi-50/brin003196603_01.pdf,True,fail,1260,/home/johan/kb/digitalisering/pdf-qa/test-batches/pq_mybatch_001.xml
+/home/johan/kb/digitalisering/pdf-qa/test-batches/mybatch/20241105/_deu002201201/300dpi-85/_deu002201201_01.pdf,True,fail,297,/home/johan/kb/digitalisering/pdf-qa/test-batches/pq_mybatch_001.xml
+/home/johan/kb/digitalisering/pdf-qa/test-batches/mybatch/20241105/_deu002201201/300dpi-50/_deu002201201_01.pdf,True,fail,297,/home/johan/kb/digitalisering/pdf-qa/test-batches/pq_mybatch_001.xml
+/home/johan/kb/digitalisering/pdf-qa/test-batches/mybatch/20241105/_boe012192401/300dpi-85/_boe012192401_01.pdf,True,pass,346,/home/johan/kb/digitalisering/pdf-qa/test-batches/pq_mybatch_001.xml
+/home/johan/kb/digitalisering/pdf-qa/test-batches/mybatch/20241105/_boe012192401/300dpi-50/_boe012192401_01.pdf,True,fail,346,/home/johan/kb/digitalisering/pdf-qa/test-batches/pq_mybatch_001.xml
 ```
 
 ## Licensing

@@ -116,16 +116,39 @@ def parseCommandLine():
 
 def listProfilesSchemas(profilesDir, schemasDir):
     """List all available profiles and schemas"""
-    profileNames = os.listdir(profilesDir)
+    profiles = os.listdir(profilesDir)
     print("Available profiles (directory {}):".format(profilesDir))
-    for profileName in profileNames:
-        print("  - {}".format(profileName))
-        profileNames = os.listdir(profilesDir)
-    schemaNames = os.listdir(schemasDir)
+    for profile in profiles:
+        print("  - {}".format(profile))
+    schemas = os.listdir(schemasDir)
     print("Available schemas (directory {}):".format(schemasDir))
-    for schemaName in schemaNames:
-        print("  - {}".format(schemaName))
+    for schema in schemas:
+        print("  - {}".format(schema))
     sys.exit()
+
+
+def checkProfilesSchemas(profilesDir, schemasDir):
+    """Check if all profiles and schemas can be read without
+    throwing parse errors"""
+    profiles = os.listdir(profilesDir)
+    for profile in profiles:
+        try:
+            readAsLXMLElt(os.path.join(profilesDir, profile))
+        except Exception:
+            msg = ("error parsing profile {}").format(profile)
+            errorExit(msg)
+    schemas = os.listdir(schemasDir)
+    for schema in schemas:
+        try:
+            schemaElt = readAsLXMLElt(os.path.join(schemasDir, schema))
+        except Exception:
+            msg = ("error parsing schema {}").format(schema)
+            errorExit(msg)
+        try:
+            isoschematron.Schematron(schemaElt)
+        except etree.XSLTParseError:
+            msg = ("XSLT parse error for schema {}").format(schema)
+            errorExit(msg)       
 
 
 def readProfile(profile, schemasDir):
@@ -414,37 +437,46 @@ def getProperties(PDF):
 def validate(schema, propertiesElt, verboseFlag):
     """Validate extracted properties against schema"""
 
-    # Initial value of validation status
-    status = "pass"
+    # Initial value of validation outcome
+    validationOutcome = "pass"
+
+    # Initial value of flag that indicates whether validation ran
+    validationSuccess = False
 
     # Element used to store validation report
     reportElt = etree.Element("schematronReport")
     # Get schema as lxml.etree element
     mySchemaElt = readAsLXMLElt(schema)
+    # Start Schematron magic ...
+    schematron = isoschematron.Schematron(mySchemaElt,
+                                          store_report=True)
+
     try:
-        # Start Schematron magic ...
-        schematron = isoschematron.Schematron(mySchemaElt,
-                                              store_report=True)
-        # Validate tools output against schema
-        schemaValidationResult = schematron.validate(propertiesElt)
-        # Set status to "fail" if proprties didn't pass validation
-        if not schemaValidationResult:
-            status = "fail"
+        # Validate properties element against schema
+        validationResult = schematron.validate(propertiesElt)
+        # Set status to "fail" if properties didn't pass validation
+        if not validationResult:
+            validationOutcome = "fail"
         report = schematron.validation_report
+        validationSuccess = True
 
     except Exception:
-        status = "fail"
+        validationOutcome = "fail"
         logging.error(("Schematron validation failed for {}").format(schema))
 
-    # Re-parse Schematron report
-    report = etree.fromstring(str(report))
-    # Make report less verbose
-    if not verboseFlag:
-        report = summariseSchematron(report)
-    # Add to report element
-    reportElt.append(report)
+    try:
+        # Re-parse Schematron report
+        report = etree.fromstring(str(report))
+        # Make report less verbose
+        if not verboseFlag:
+            report = summariseSchematron(report)
+        # Add to report element
+        reportElt.append(report)
+    except Exception:
+        # No report available because Schematron validation failed
+        pass
 
-    return status, reportElt
+    return validationSuccess, validationOutcome, reportElt
 
 
 def processPDF(PDF, verboseFlag, schemas):
@@ -459,7 +491,9 @@ def processPDF(PDF, verboseFlag, schemas):
     parentDir = os.path.basename(fPath)
 
     # Initial value of flag that indicates whether PDF passes or fails quality checks
-    status = "pass"
+    validationOutcome = "pass"
+    # Initial value of flag that indicates whether validation was successful
+    validationSuccess = False
     # Initial value of flag that indicates schema match
     schemaMatch = False
     # Initial value of schema reference
@@ -509,21 +543,27 @@ def processPDF(PDF, verboseFlag, schemas):
 
     # Validate extracted properties against schema
     if schemaMatch:
-        status, reportElt = validate(mySchema, propertiesElt, verboseFlag)
+        validationSuccess, validationOutcome, reportElt = validate(mySchema, propertiesElt, verboseFlag)
     else:
         # No schema match
-        status = "fail"
+        validationOutcome = "fail"
         logging.warning("no schema match")
+
+    if not validationSuccess:
+        logging.warning("Schematron validation was not successful")
 
     # Create schema and status elements
     schemaElt = etree.Element("schema")
     schemaElt.text = mySchema
-    statusElt = etree.Element("status")
-    statusElt.text = status
+    validationSuccessElt = etree.Element("validationSuccess")
+    validationSuccessElt.text = str(validationSuccess)
+    validationOutcomeElt = etree.Element("validationOutcome")
+    validationOutcomeElt.text = validationOutcome
     # Add all child elements to PDF element
     pdfElt.append(propertiesElt)
     pdfElt.append(schemaElt)
-    pdfElt.append(statusElt)
+    pdfElt.append(validationSuccessElt)
+    pdfElt.append(validationOutcomeElt)
     if schemaMatch:
         pdfElt.append(reportElt)
 
@@ -564,6 +604,9 @@ def main():
         shutil.copytree(profilesDirPackage, profilesDir)
     if not os.path.isdir(schemasDir):
         shutil.copytree(schemasDirPackage, schemasDir)
+
+    # Check if all profiles and schemas can be parsed
+    checkProfilesSchemas(profilesDir, schemasDir)
 
     # Get input from command line
     args = parseCommandLine()
@@ -616,7 +659,7 @@ def main():
     summaryFile = os.path.join(outDir, summaryFile)
     with open(summaryFile, 'w', newline='', encoding='utf-8') as fSum:
         writer = csv.writer(fSum)
-        writer.writerow(["file", "status", "noPages", "fileOut"])
+        writer.writerow(["file", "validationSuccess", "validationOutcome", "noPages", "fileOut"])
 
     listPDFs = getFilesFromTree(batchDir, "pdf")
 
@@ -644,10 +687,11 @@ def main():
         pdfResult = processPDF(myPDF, verboseFlag, schemas)
         if len(pdfResult) != 0:
             noPages = pdfResult.find('properties/noPages').text
-            status = pdfResult.find('status').text
+            validationSuccess = pdfResult.find('validationSuccess').text
+            validationOutcome = pdfResult.find('validationOutcome').text
             with open(summaryFile, 'a', newline='', encoding='utf-8') as fSum:
                 writer = csv.writer(fSum)
-                writer.writerow([myPDF, status, noPages, fileOut])
+                writer.writerow([myPDF, validationSuccess, validationOutcome, noPages, fileOut])
             # Convert output to XML and add to output file
             outXML = etree.tostring(pdfResult,
                                     method='xml',
