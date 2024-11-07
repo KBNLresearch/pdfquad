@@ -142,7 +142,7 @@ This is a schema for production master PDFs with images in JPEG format that are 
 |Image stream format|JPEG|
 |Image stream resolution (ppi)|\[299, 301\]|
 |Image stream color components|3|
-|Image stream JPEG Quality||\[83, 87\]|
+|Image stream JPEG Quality|\[83, 87\]|
 |ICC profile|Defined as either PDF object, or embedded in image stream|
 |Width, height|Image XObject values and image stream values are identical|
 |Bits per component|Image XObject values and image stream values are identical|
@@ -162,7 +162,7 @@ This is a schema for small access PDFs with images in JPEG format that are compr
 |Image stream format|JPEG|
 |Image stream resolution (ppi)|\[299, 301\]|
 |Image stream color components|3|
-|Image stream JPEG Quality||\[48, 52\]|
+|Image stream JPEG Quality|\[48, 52\]|
 |ICC profile|Defined as either PDF object, or embedded in image stream|
 |Width, height|Image XObject values and image stream values are identical|
 |Bits per component|Image XObject values and image stream values are identical|
