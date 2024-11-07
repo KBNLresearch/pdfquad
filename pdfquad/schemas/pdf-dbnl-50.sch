@@ -61,5 +61,17 @@
         <s:assert test="(signatureFlag  = -1)">Document contains one or more digital signatures</s:assert>
     </s:rule>
 
+    <!-- Checks at errors level -->
+    <s:rule context="/properties/errors">
+        <!-- Check on absence of any errors -->
+        <s:assert test="(count(error) = 0)">Properties extraction resulted in one or more unexpected errors</s:assert>
+    </s:rule>
+
+    <!-- Checks at warnings level -->
+    <s:rule context="/properties/warnings">
+        <!-- Check on absence of any errors -->
+        <s:assert test="(count(warning) = 0)">Properties extraction resulted in one or more warnings</s:assert>
+    </s:rule>
+
 </s:pattern>
 </s:schema>

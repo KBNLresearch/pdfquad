@@ -19,7 +19,7 @@ import logging
 from lxml import isoschematron
 from lxml import etree
 import pymupdf
-from PIL import Image
+import PIL
 from PIL import ImageCms
 from . import jpegquality
 
@@ -335,8 +335,12 @@ def findSchema(PDF, schemas):
 def getProperties(PDF):
     """Extract properties and return result as Element object"""
 
-    # Create element object to store properties
+    # Create element object to store all properties
     propertiesElt = etree.Element("properties")
+    # These elements are used to store any errors or warnings encountered
+    # while parsing the file
+    errorsElt = etree.Element("errors")
+    warningsElt = etree.Element("warnings")
 
     # Create and fill descriptive elements
     fPathElt = etree.Element("filePath")
@@ -390,53 +394,67 @@ def getProperties(PDF):
 
             # Read raw image stream data from xref id
             xref = propsPDF['xref']
-            stream = doc.xref_stream_raw(xref)
-            im = Image.open(io.BytesIO(stream))
-            im.load()
+            imageReadSuccess = False
             propsStream = {}
-            propsStream['format'] = im.format
-            width = im.size[0]
-            height = im.size[1]
-            propsStream['width'] = width
-            propsStream['height'] = height
-            propsStream['mode'] = im.mode
-            noComponents = len(im.getbands())
-            propsStream['components']= noComponents
-            bitsPerComponent = getBPC(im)
-            propsStream['bpc'] = bitsPerComponent
-
+            stream = doc.xref_stream_raw(xref)
             try:
-                # Estimate JPEG quality using least squares matching against
-                # standard quantization tables
-                quality, rmsError, nse = jpegquality.computeJPEGQuality(im)
-                propsStream['JPEGQuality'] = quality
-                propsStream['NSE_JPEGQuality'] = nse
-            except Exception:
-                pass
+                im = PIL.Image.open(io.BytesIO(stream))
+                im.load()
+                imageReadSuccess = True
+            except PIL.UnidentifiedImageError as e:
+                warn = etree.SubElement(warningsElt,'warning')
+                warn.text = str(e)
+            except Exception as e:
+                err = etree.SubElement(errorsElt,'error')
+                err.text = str(e)
 
-            for key, value in im.info.items():
-                if isinstance(value, bytes):
-                    propsStream[key] = 'bytestream'
-                elif key == 'dpi' and isinstance(value, tuple):
-                    propsStream['ppi_x'] = value[0]
-                    propsStream['ppi_y'] = value[1]
-                elif key == 'jfif_density' and isinstance(value, tuple):
-                    propsStream['jfif_density_x'] = value[0]
-                    propsStream['jfif_density_y'] = value[1]
-                elif isinstance(value, tuple):
-                    # Skip any other properties that return tuples
-                    pass
-                else:
-                    propsStream[key] = value
+            if imageReadSuccess:
+                propsStream['format'] = im.format
+                width = im.size[0]
+                height = im.size[1]
+                propsStream['width'] = width
+                propsStream['height'] = height
+                propsStream['mode'] = im.mode
+                noComponents = len(im.getbands())
+                propsStream['components']= noComponents
+                bitsPerComponent = getBPC(im)
+                propsStream['bpc'] = bitsPerComponent
 
-            try:
-                # ICC profile name and description
-                icc = im.info['icc_profile']
-                iccProfile = ImageCms.ImageCmsProfile(io.BytesIO(icc))
-                propsStream['icc_profile_name'] = ImageCms.getProfileName(iccProfile).strip()
-                propsStream['icc_profile_description'] = ImageCms.getProfileDescription(iccProfile).strip()
-            except KeyError:
-                pass
+                if im.format == "JPEG":
+                    try:
+                        # Estimate JPEG quality using least squares matching
+                        # against standard quantization tables
+                        quality, rmsError, nse = jpegquality.computeJPEGQuality(im)
+                        propsStream['JPEGQuality'] = quality
+                        propsStream['NSE_JPEGQuality'] = nse
+                    except Exception as e:
+                        err = etree.SubElement(errorsElt,'error')
+                        err.text = str(e)
+
+                for key, value in im.info.items():
+                    if isinstance(value, bytes):
+                        propsStream[key] = 'bytestream'
+                    elif key == 'dpi' and isinstance(value, tuple):
+                        propsStream['ppi_x'] = value[0]
+                        propsStream['ppi_y'] = value[1]
+                    elif key == 'jfif_density' and isinstance(value, tuple):
+                        propsStream['jfif_density_x'] = value[0]
+                        propsStream['jfif_density_y'] = value[1]
+                    elif isinstance(value, tuple):
+                        # Skip any other properties that return tuples
+                        pass
+                    else:
+                        propsStream[key] = value
+
+                try:
+                    # ICC profile name and description
+                    icc = im.info['icc_profile']
+                    iccProfile = ImageCms.ImageCmsProfile(io.BytesIO(icc))
+                    propsStream['icc_profile_name'] = ImageCms.getProfileName(iccProfile).strip()
+                    propsStream['icc_profile_description'] = ImageCms.getProfileDescription(iccProfile).strip()
+                except KeyError as e:
+                    err = etree.SubElement(errorsElt,'error')
+                    err.text = str(e)
 
             # Dictionaries to element objects
             propsPDFElt = dictionaryToElt('pdf', propsPDF)
@@ -461,6 +479,9 @@ def getProperties(PDF):
     noPagesElt.text = str(pages)
     propertiesElt.append(noPagesElt)
     propertiesElt.append(pagesElt)
+
+    propertiesElt.append(warningsElt)
+    propertiesElt.append(errorsElt)
 
     return propertiesElt
 
