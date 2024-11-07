@@ -85,7 +85,7 @@ usage: pdfquad [-h] [--maxpdfs MAXPDFS] [--prefixout PREFIXOUT]
 
 |Argument|Description|
 |:-----|:--|
-|`profile`|this defines the validation profile file|
+|`profile`|this defines the validation profile|
 |`batchDir`|this defines the batch directory that will be analyzed|
 
 ### Optional arguments
@@ -103,7 +103,7 @@ usage: pdfquad [-h] [--maxpdfs MAXPDFS] [--prefixout PREFIXOUT]
 In the simplest case, we can call pdfquad with the profile and the batch directory as the only arguments:
 
 ```
-pdfquad  ~/.config/pdfquad/profiles/dbnl-fulltext.xml ./mybatch
+pdfquad  dbnl-fulltext.xml ./mybatch
 ```
 
 Pdfquad will now recursively traverse all directories and files inside the "myBatch" directory, and analyse all PDF files (based on a file extension match).

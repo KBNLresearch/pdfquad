@@ -25,6 +25,8 @@ from . import jpegquality
 
 __version__ = "0.2.a1"
 
+# Create parser
+parser = argparse.ArgumentParser(description="Automated PDF Quality Assessment digitisation batches")
 
 def errorExit(msg):
     """Write error to stderr and exit"""
@@ -71,32 +73,37 @@ def removeFile(fileIn):
 def parseCommandLine():
     """Parse command line"""
 
-    # Create parser
-    parser = argparse.ArgumentParser(description="Automated PDF Quality Assessment digitisation batches")
+    # Sub-parsers for process and list commands
 
-    parser.add_argument('profile',
-                        action="store",
-                        help='validation profile name (use "pdfquad list" to list available profiles)')
-    parser.add_argument('batchDir',
-                        action="store",
-                        help="batch directory")
-    parser.add_argument('--maxpdfs', '-x',
-                        action="store",
-                        default=10,
-                        help="maximum number of reported PDFs per output file; for larger numbers \
-                              output is split across multiple files")
-    parser.add_argument('--prefixout', '-p',
-                        action="store",
-                        default='pq',
-                        help="prefix of output files")
-    parser.add_argument('--outdir', '-o',
-                        action="store",
-                        default=os.getcwd(),
-                        help="output directory")
-    parser.add_argument('--verbose', '-b',
-                        action="store_true",
-                        default=False,
-                        help="report Schematron report in verbose format")
+    subparsers = parser.add_subparsers(help='sub-command help',
+                                       dest='subcommand')
+    parser_process = subparsers.add_parser('process',
+                                          help='process a batch')
+    parser_process.add_argument('profile',
+                                action="store",
+                                help='validation profile name (use "pdfquad list" to list available profiles)')
+    parser_process.add_argument('batchDir',
+                                action="store",
+                                help="batch directory")
+    parser_process.add_argument('--maxpdfs', '-x',
+                                action="store",
+                                default=10,
+                                help="maximum number of reported PDFs per output file; for larger numbers \
+                                    output is split across multiple files")
+    parser_process.add_argument('--prefixout', '-p',
+                                action="store",
+                                default='pq',
+                                help="prefix of output files")
+    parser_process.add_argument('--outdir', '-o',
+                                action="store",
+                                default=os.getcwd(),
+                                help="output directory")
+    parser_process.add_argument('--verbose', '-b',
+                                action="store_true",
+                                default=False,
+                                help="report Schematron report in verbose format")
+    parser_list = subparsers.add_parser('list',
+                                        help='list available profiles and schemas')
     parser.add_argument('--version', '-v',
                         action="version",
                         version=__version__)
@@ -104,26 +111,20 @@ def parseCommandLine():
     # Parse arguments
     args = parser.parse_args()
 
-    # Normalise all directory paths
-    args.batchDir = os.path.normpath(args.batchDir)
-    args.outdir = os.path.normpath(args.outdir)
-
-    # Strip any path info from entered profile
-    _, fName = os.path.split(args.profile)
-    args.profile = fName
-
-    # Convert maxpdfs to integer
-    args.maxpdfs = int(args.maxpdfs)
-
     return args
 
 
-def listProfiles(profilesDir):
-    """List all available profiles"""
+def listProfilesSchemas(profilesDir, schemasDir):
+    """List all available profiles and schemas"""
     profileNames = os.listdir(profilesDir)
-    print("\nAvailable profiles:\n")
+    print("Available profiles (directory {}):".format(profilesDir))
     for profileName in profileNames:
-        print(profileName)
+        print("  - {}".format(profileName))
+        profileNames = os.listdir(profilesDir)
+    schemaNames = os.listdir(schemasDir)
+    print("Available schemas (directory {}):".format(schemasDir))
+    for schemaName in schemaNames:
+        print("  - {}".format(schemaName))
     sys.exit()
 
 
@@ -544,13 +545,22 @@ def main():
 
     # Get input from command line
     args = parseCommandLine()
-    profile = args.profile
-    batchDir = args.batchDir
-    prefixOut = args.prefixout
-    outDir = args.outdir
-    maxPDFs = args.maxpdfs
-    verboseFlag = args.verbose
+    action = args.subcommand
 
+    if action == "process":
+        profile = os.path.basename(args.profile)
+        batchDir = os.path.normpath(args.batchDir)
+        prefixOut = args.prefixout
+        outDir = os.path.normpath(args.outdir)
+        maxPDFs = int(args.maxpdfs)
+        verboseFlag = args.verbose
+    elif action == "list":
+        listProfilesSchemas(profilesDir, schemasDir)
+    elif action is None:
+        print('')
+        parser.print_help()
+        sys.exit()
+    
     # Add profilesDir to profile definition
     profile = os.path.join(profilesDir, profile)
 
