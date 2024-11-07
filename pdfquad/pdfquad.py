@@ -49,27 +49,6 @@ def checkDirExists(pathIn):
         errorExit(msg)
 
 
-def openFileForAppend(wFile):
-    """Opens file for writing in append + binary mode"""
-    try:
-        f = open(wFile, "a", encoding="utf-8")
-        return f
-
-    except Exception:
-        msg = "{} could not be written".format(wFile) 
-        errorExit(msg)
-
-
-def removeFile(fileIn):
-    """Remove a file"""
-    try:
-        if os.path.isfile(fileIn):
-            os.remove(fileIn)
-    except Exception:
-        msg = "Could not remove {}".format(fileIn)
-        errorExit(msg)
-
-
 def parseCommandLine():
     """Parse command line"""
 
