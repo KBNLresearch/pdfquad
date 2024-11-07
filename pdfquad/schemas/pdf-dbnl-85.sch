@@ -40,6 +40,9 @@
         <!-- Check on JPEG compression quality level (with tolerance of +/- 2 levels) -->
         <s:assert test="(JPEGQuality &gt;= 83) and
         (JPEGQuality &lt;= 87)">JPEG compression quality outside permitted range</s:assert>
+        <!-- Check on absence of any exceptions while parsing the image stream -->
+        <s:assert test="(count(exceptions/exception) = 0)">Properties extraction at stream level resulted in one or more exceptions</s:assert>
+
     </s:rule>
 
     <!-- Checks at combined PDF object and image stream levels -->
@@ -59,18 +62,6 @@
         <s:assert test="(PageMode  != '/UseThumbs')">PageMode value is /UseThumbs</s:assert>
         <!-- Check on signatureFlag value to ensure document doesn't contain digital signatures -->
         <s:assert test="(signatureFlag  = -1)">Document contains one or more digital signatures</s:assert>
-    </s:rule>
-
-    <!-- Checks at errors level -->
-    <s:rule context="/properties/errors">
-        <!-- Check on absence of any errors -->
-        <s:assert test="(count(error) = 0)">Properties extraction resulted in one or more unexpected errors</s:assert>
-    </s:rule>
-
-    <!-- Checks at warnings level -->
-    <s:rule context="/properties/warnings">
-        <!-- Check on absence of any errors -->
-        <s:assert test="(count(warning) = 0)">Properties extraction resulted in one or more warnings</s:assert>
     </s:rule>
 
 </s:pattern>

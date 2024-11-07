@@ -337,10 +337,6 @@ def getProperties(PDF):
 
     # Create element object to store all properties
     propertiesElt = etree.Element("properties")
-    # These elements are used to store any errors or warnings encountered
-    # while parsing the file
-    errorsElt = etree.Element("errors")
-    warningsElt = etree.Element("warnings")
 
     # Create and fill descriptive elements
     fPathElt = etree.Element("filePath")
@@ -383,6 +379,7 @@ def getProperties(PDF):
         images = page.get_images(full=False)
         for image in images:
             imageElt = etree.Element("image")
+            exceptionsStreamElt = etree.Element("exceptions")
             # Store PDF object level properties to dictionary
             propsPDF = {}
             propsPDF['xref'] = image[0]
@@ -404,12 +401,9 @@ def getProperties(PDF):
                 im = PIL.Image.open(io.BytesIO(stream))
                 im.load()
                 imageReadSuccess = True
-            except PIL.UnidentifiedImageError as e:
-                warn = etree.SubElement(warningsElt,'warning')
-                warn.text = str(e)
             except Exception as e:
-                err = etree.SubElement(errorsElt,'error')
-                err.text = str(e)
+                ex = etree.SubElement(exceptionsStreamElt,'exception')
+                ex.text = str(e)
 
             if imageReadSuccess:
                 propsStream['format'] = im.format
@@ -431,8 +425,8 @@ def getProperties(PDF):
                         propsStream['JPEGQuality'] = quality
                         propsStream['NSE_JPEGQuality'] = nse
                     except Exception as e:
-                        err = etree.SubElement(errorsElt,'error')
-                        err.text = str(e)
+                        ex = etree.SubElement(exceptionsStreamElt,'exception')
+                        ex.text = str(e)
 
                 for key, value in im.info.items():
                     if isinstance(value, bytes):
@@ -455,13 +449,14 @@ def getProperties(PDF):
                     iccProfile = ImageCms.ImageCmsProfile(io.BytesIO(icc))
                     propsStream['icc_profile_name'] = ImageCms.getProfileName(iccProfile).strip()
                     propsStream['icc_profile_description'] = ImageCms.getProfileDescription(iccProfile).strip()
-                except KeyError as e:
-                    err = etree.SubElement(errorsElt,'error')
-                    err.text = str(e)
+                except Exception as e:
+                    ex = etree.SubElement(exceptionsStreamElt,'exception')
+                    ex.text = str(e)
 
             # Dictionaries to element objects
             propsPDFElt = dictionaryToElt('pdf', propsPDF)
             propsStreamElt = dictionaryToElt('stream', propsStream)
+            propsStreamElt.append(exceptionsStreamElt)
             # Add properties to image element
             imageElt.append(propsPDFElt)
             imageElt.append(propsStreamElt)
@@ -482,9 +477,6 @@ def getProperties(PDF):
     noPagesElt.text = str(pages)
     propertiesElt.append(noPagesElt)
     propertiesElt.append(pagesElt)
-
-    propertiesElt.append(warningsElt)
-    propertiesElt.append(errorsElt)
 
     return propertiesElt
 
