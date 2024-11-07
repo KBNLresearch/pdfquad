@@ -278,72 +278,17 @@ def writeXMLFooter(fileOut):
         f.write(xmlFoot.encode('utf-8'))
 
 
-def processPDF(PDF, verboseFlag, schemas):
-    """Process one PDF"""
+def getProperties(PDF):
+    """Extract properties and return result as Element object"""
 
-    # Create output element for this PDF
-    pdfElt = etree.Element("file")
-
-    # File name and parent directory name for this PDF
-
-    fPath, fName = os.path.split(PDF)
-    parentDir = os.path.basename(fPath)
-
-    # Initial value of flag that indicates whether PDF passes or fails quality checks
-    status = "pass"
-    # Initial value of flag that indicates schema match
-    schemaMatch = False
-    # Initial value of schema reference
-    mySchema = "undefined"
-
-    # Select schema based on directory or file name pattern defined in profile
-    for schema in schemas:
-        mType = schema[0]
-        mMatch = schema[1]
-        mPattern = schema[2]
-        mSchema = schema[3]
-        if mType == "parentDirName" and mMatch == "is":
-            if parentDir == mPattern:
-                mySchema = mSchema
-                schemaMatch = True
-        elif mType == "parentDirName" and mMatch == "startswith":
-            if parentDir.startswith(mPattern):
-                mySchema = mSchema
-                schemaMatch = True
-        elif mType == "parentDirName" and mMatch == "endswith":
-            if parentDir.endswith(mPattern):
-                mySchema = mSchema
-                schemaMatch = True
-        elif mType == "parentDirName" and mMatch == "contains":
-            if mPattern in parentDir:
-                mySchema = mSchema
-                schemaMatch = True
-        if mType == "fileName" and mMatch == "is":
-            if fName == mPattern:
-                mySchema = mSchema
-                schemaMatch = True
-        elif mType == "fileName" and mMatch == "startswith":
-            if fName.startswith(mPattern):
-                mySchema = mSchema
-                schemaMatch = True
-        elif mType == "fileName" and mMatch == "endswith":
-            if fName.endswith(mPattern):
-                mySchema = mSchema
-                schemaMatch = True
-        elif mType == "fileName" and mMatch == "contains":
-            if mPattern in fName:
-                mySchema = mSchema
-                schemaMatch = True
+    # Create element object to store properties
+    propertiesElt = etree.Element("properties")
 
     # Create and fill descriptive elements
     fPathElt = etree.Element("filePath")
     fPathElt.text = PDF
     fSizeElt = etree.Element("fileSize")
     fSizeElt.text = str(os.path.getsize(PDF))
-
-    # Create elements to store properties and Schematron report
-    propertiesElt = etree.Element("properties")
-    reportElt = etree.Element("schematronReport")
 
     # Parse PDF
     doc = pymupdf.open(PDF)
@@ -463,31 +408,110 @@ def processPDF(PDF, verboseFlag, schemas):
     propertiesElt.append(noPagesElt)
     propertiesElt.append(pagesElt)
 
+    return propertiesElt
+
+
+def validate(schema, propertiesElt, verboseFlag):
+    """Validate extracted properties against schema"""
+
+    # Initial value of validation status
+    status = "pass"
+
+    # Element used to store validation report
+    reportElt = etree.Element("schematronReport")
+    # Get schema as lxml.etree element
+    mySchemaElt = readAsLXMLElt(schema)
+    try:
+        # Start Schematron magic ...
+        schematron = isoschematron.Schematron(mySchemaElt,
+                                              store_report=True)
+        # Validate tools output against schema
+        schemaValidationResult = schematron.validate(propertiesElt)
+        report = schematron.validation_report
+
+    except Exception:
+        status = "fail"
+        logging.error(("Schematron validation failed for {}").format(schema))
+
+    # Re-parse Schematron report
+    report = etree.fromstring(str(report))
+    # Make report less verbose
+    if not verboseFlag:
+        report = summariseSchematron(report)
+    # Add to report element
+    reportElt.append(report)
+    # Set status to "fail" in case of any failed asserts
+    for elem in report.iter():
+        if elem.tag == "{http://purl.oclc.org/dsdl/svrl}failed-assert":
+            status = "fail"
+            break
+
+    return status, reportElt
+
+
+def processPDF(PDF, verboseFlag, schemas):
+    """Process one PDF"""
+
+    # Create output element for this PDF
+    pdfElt = etree.Element("file")
+
+    # File name and parent directory name for this PDF
+
+    fPath, fName = os.path.split(PDF)
+    parentDir = os.path.basename(fPath)
+
+    # Initial value of flag that indicates whether PDF passes or fails quality checks
+    status = "pass"
+    # Initial value of flag that indicates schema match
+    schemaMatch = False
+    # Initial value of schema reference
+    mySchema = "undefined"
+
+    # Select schema based on directory or file name pattern defined in profile
+    for schema in schemas:
+        mType = schema[0]
+        mMatch = schema[1]
+        mPattern = schema[2]
+        mSchema = schema[3]
+        if mType == "parentDirName" and mMatch == "is":
+            if parentDir == mPattern:
+                mySchema = mSchema
+                schemaMatch = True
+        elif mType == "parentDirName" and mMatch == "startswith":
+            if parentDir.startswith(mPattern):
+                mySchema = mSchema
+                schemaMatch = True
+        elif mType == "parentDirName" and mMatch == "endswith":
+            if parentDir.endswith(mPattern):
+                mySchema = mSchema
+                schemaMatch = True
+        elif mType == "parentDirName" and mMatch == "contains":
+            if mPattern in parentDir:
+                mySchema = mSchema
+                schemaMatch = True
+        if mType == "fileName" and mMatch == "is":
+            if fName == mPattern:
+                mySchema = mSchema
+                schemaMatch = True
+        elif mType == "fileName" and mMatch == "startswith":
+            if fName.startswith(mPattern):
+                mySchema = mSchema
+                schemaMatch = True
+        elif mType == "fileName" and mMatch == "endswith":
+            if fName.endswith(mPattern):
+                mySchema = mSchema
+                schemaMatch = True
+        elif mType == "fileName" and mMatch == "contains":
+            if mPattern in fName:
+                mySchema = mSchema
+                schemaMatch = True
+
+    # Extract properties
+    propertiesElt = getProperties(PDF)
+
+    # Validate extracted properties against schema
     if schemaMatch:
-        # Get schema as lxml.etree element
-        mySchemaElt = readAsLXMLElt(mySchema)
-        try:
-            # Start Schematron magic ...
-            schematron = isoschematron.Schematron(mySchemaElt,
-                                                    store_report=True)
-            # Validate tools output against schema
-            schemaValidationResult = schematron.validate(propertiesElt)
-            report = schematron.validation_report
-
-        except Exception:
-            logging.error(("Schematron validation failed for {}").format(mySchema))
-
-        # Re-parse Schematron report
-        report = etree.fromstring(str(report))
-        # Make report less verbose
-        if not verboseFlag:
-            report = summariseSchematron(report)
-        # Add to report element
-        reportElt.append(report)
-        for elem in report.iter():
-            if elem.tag == "{http://purl.oclc.org/dsdl/svrl}failed-assert":
-                status = "fail"
-                break
+        status, reportElt = validate(mySchema, propertiesElt, verboseFlag)
     else:
         # No schema match
         status = "fail"
