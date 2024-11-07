@@ -23,7 +23,7 @@ from PIL import Image
 from PIL import ImageCms
 from . import jpegquality
 
-__version__ = "0.2.a1"
+__version__ = "0.2.a2"
 
 # Create parser
 parser = argparse.ArgumentParser(description="PDF QUality Assessment for Digitisation batches")
