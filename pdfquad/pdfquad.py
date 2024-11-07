@@ -525,7 +525,7 @@ def main():
 
     # Profile and schema locations in installed package and config folder
     profilesDirPackage = os.path.join(packageDir, "profiles")
-    schemasDirPackage = schemasDir = os.path.join(packageDir, "schemas")
+    schemasDirPackage = os.path.join(packageDir, "schemas")
     profilesDir = os.path.join(configpath, "profiles")
     schemasDir = os.path.join(configpath, "schemas")
 
