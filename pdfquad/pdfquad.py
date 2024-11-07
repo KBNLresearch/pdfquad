@@ -427,6 +427,9 @@ def validate(schema, propertiesElt, verboseFlag):
                                               store_report=True)
         # Validate tools output against schema
         schemaValidationResult = schematron.validate(propertiesElt)
+        # Set status to "fail" if proprties didn't pass validation
+        if not schemaValidationResult:
+            status = "fail"
         report = schematron.validation_report
 
     except Exception:
@@ -440,11 +443,6 @@ def validate(schema, propertiesElt, verboseFlag):
         report = summariseSchematron(report)
     # Add to report element
     reportElt.append(report)
-    # Set status to "fail" in case of any failed asserts
-    for elem in report.iter():
-        if elem.tag == "{http://purl.oclc.org/dsdl/svrl}failed-assert":
-            status = "fail"
-            break
 
     return status, reportElt
 
