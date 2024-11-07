@@ -148,7 +148,7 @@ This is a schema for production master PDFs with images in JPEG format that are 
 |Bits per component|Image XObject values and image stream values are identical|
 |PageMode|Value is not /UseThumbs (no thumbnails allowed)|
 |Digital signatures|Document does not contain digital signatures|
-|Errors, warnings|Parsing of the document and its embedded image streams did not result in any errors or warnings|
+|Exceptions|Parsing of the document and its embedded image streams did not result in any exceptions|
 
 ### pdf-dbnl-50.sch
 
@@ -169,7 +169,7 @@ This is a schema for small access PDFs with images in JPEG format that are compr
 |Bits per component|Image XObject values and image stream values are identical|
 |PageMode|Value is not /UseThumbs (no thumbnails allowed)|
 |Digital signatures|Document does not contain digital signatures|
-|Errors, warnings|Parsing of the document and its embedded image streams did not result in any errors or warnings|
+|Exceptions|Parsing of the document and its embedded image streams did not result in any exceptions|
 
 ## Output
 
