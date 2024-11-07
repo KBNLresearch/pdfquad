@@ -416,7 +416,7 @@ def getProperties(PDF):
 
             for key, value in im.info.items():
                 if isinstance(value, bytes):
-                    propsStream[key] = 'bytes'
+                    propsStream[key] = 'bytestream'
                 elif key == 'dpi' and isinstance(value, tuple):
                     propsStream['ppi_x'] = value[0]
                     propsStream['ppi_y'] = value[1]
