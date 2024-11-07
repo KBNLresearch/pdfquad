@@ -375,8 +375,11 @@ def getProperties(PDF):
     # Wrapper element for pages output
     pagesElt = etree.Element("pages")
 
+    pageNo = 1
     for page in doc:
         pageElt = etree.Element("page")
+        pageElt.attrib["number"] = str(pageNo)
+        pageNo += 1
         images = page.get_images(full=False)
         for image in images:
             imageElt = etree.Element("image")
