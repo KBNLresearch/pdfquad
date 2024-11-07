@@ -81,14 +81,14 @@ usage: pdfquad [-h] [--version] {process,list} ...
 
 Pdfquad has two sub-commands:
 
-|Sub-command|Description|
+|Command|Description|
 |:-----|:--|
 |`process`|process a batch.|
 |`list`|list available profiles and schemas.|
 
-### process sub-command
+### process command
 
-Run pdfquad with the `process` sub-command to process a batch. The syntax is:
+Run pdfquad with the `process` command to process a batch. The syntax is:
 
 ```
 usage: pdfquad process [-h] [--maxpdfs MAXPDFS] [--prefixout PREFIXOUT]
@@ -96,11 +96,11 @@ usage: pdfquad process [-h] [--maxpdfs MAXPDFS] [--prefixout PREFIXOUT]
                        profile batchDir
 ```
 
-The `process` sub-command expects the following positional arguments: 
+The `process` command expects the following positional arguments: 
 
 |Argument|Description|
 |:-----|:--|
-|`profile`|this defines the validation profile. Note that any file paths entered here will be ignored, as Pdfquad only accepts  profiles from the profiles directory. You can just enter the file name without the path. Use the `list` sub-command to list all available profiles.|
+|`profile`|this defines the validation profile. Note that any file paths entered here will be ignored, as Pdfquad only accepts  profiles from the profiles directory. You can just enter the file name without the path. Use the `list` command to list all available profiles.|
 |`batchDir`|this defines the batch directory that will be analyzed.|
 
 In addition, the following optional arguments are available:
@@ -120,9 +120,9 @@ pdfquad process dbnl-fulltext.xml ./mybatch
 
 Pdfquad will now recursively traverse all directories and files inside the "mybatch" directory, and analyse all PDF files (based on a file extension match).
 
-### list sub-command
+### list command
 
-Run pdfquad with the `list` sub-command to get a list of the available profiles and schemas, as well as their locations. For example:
+Run pdfquad with the `list` command to get a list of the available profiles and schemas, as well as their locations. For example:
 
 ```
 pdfquad list
