@@ -68,45 +68,75 @@ Currently the following schemas are included:
 
 |Schema|Description|
 |:--|:--|
-|pdf-dbnl-50.sch|Schema for small access PDFs with 50% quality JPEG compression|
-|pdf-dbnl-85.sch|Schema for production master PDFs  with 85% quality JPEG compression|
+|pdf-dbnl-50.sch|Schema for small access PDFs with 50% quality JPEG compression.|
+|pdf-dbnl-85.sch|Schema for production master PDFs  with 85% quality JPEG compression.|
 
 ## Command-line syntax
 
-The syntax of pdfquad is as follows:
+The general syntax of pdfquad is:
 
 ```
-usage: pdfquad [-h] [--maxpdfs MAXPDFS] [--prefixout PREFIXOUT]
-               [--outdir OUTDIR] [--verbose] [--version]
-               profile batchDir
+usage: pdfquad [-h] [--version] {process,list} ...
 ```
 
-### Positional arguments
+Pdfquad has two sub-commands:
+
+|Sub-command|Description|
+|:-----|:--|
+|`process`|process a batch.|
+|`list`|list available profiles and schemas.|
+
+### process sub-command
+
+Run pdfquad with the `process` sub-command to process a batch. The syntax is:
+
+```
+usage: pdfquad process [-h] [--maxpdfs MAXPDFS] [--prefixout PREFIXOUT]
+                       [--outdir OUTDIR] [--verbose]
+                       profile batchDir
+```
+
+The `process` sub-command expects the following positional arguments: 
 
 |Argument|Description|
 |:-----|:--|
-|`profile`|this defines the validation profile|
-|`batchDir`|this defines the batch directory that will be analyzed|
+|`profile`|this defines the validation profile. Note that any file paths entered here will be ignored, as Pdfquad only accepts  profiles from the profiles directory. You can just enter the file name without the path. Use the `list` sub-command to list all available profiles.|
+|`batchDir`|this defines the batch directory that will be analyzed.|
 
-### Optional arguments
+In addition, the following optional arguments are available:
 
 |Argument|Description|
 |:-----|:--|
-|`--maxpdfs`, `-x`|this defines the maximum number of PDFs that are reported in each output XML file (default = 10)|
-|`--prefixout`, `p`|this defines a text prefix on which the names of the output files are based (default = "pq")|
-|`--outdir`, `-o`|this defines the directory where output is written (default = current working directory from which pdfquad is launched)|
-|`--verbose`, `-b`|this tells pdfquad to report Schematron output in verbose format|
-|`--version`, `-v`|this tells pdfquad to show its version number and exit|
-
-## Example
+|`--maxpdfs`, `-x`|this defines the maximum number of PDFs that are reported in each output XML file (default: 10).|
+|`--prefixout`, `p`|this defines a text prefix on which the names of the output files are based (default: "pq").|
+|`--outdir`, `-o`|this defines the directory where output is written (default: current working directory from which pdfquad is launched).|
+|`--verbose`, `-b`|this tells pdfquad to report Schematron output in verbose format.|
 
 In the simplest case, we can call pdfquad with the profile and the batch directory as the only arguments:
 
 ```
-pdfquad  dbnl-fulltext.xml ./mybatch
+pdfquad process dbnl-fulltext.xml ./mybatch
 ```
 
-Pdfquad will now recursively traverse all directories and files inside the "myBatch" directory, and analyse all PDF files (based on a file extension match).
+Pdfquad will now recursively traverse all directories and files inside the "mybatch" directory, and analyse all PDF files (based on a file extension match).
+
+### list sub-command
+
+Run pdfquad with the `list` sub-command to get a list of the available profiles and schemas, as well as their locations. For example:
+
+```
+pdfquad list
+```
+
+Results in:
+
+```
+Available profiles (directory /home/johan/.config/pdfquad/profiles):
+  - dbnl-fulltext.xml
+Available schemas (directory /home/johan/.config/pdfquad/schemas):
+  - pdf-dbnl-85.sch
+  - pdf-dbnl-50.sch
+```
 
 ## Output
 
@@ -125,7 +155,7 @@ Since these files can get really large, Pdfquad splits the results across multip
 By default Pdfquad limits the number of reported PDFs for each output file to 10, after which it creates a new file. This behaviour can be changed by using the `--maxpdfs` (alias `-x`) option. For example, the command below will limit the number of PDFs per output file to 1 (so each PDF will have its dedicated output file):
 
 ```
-pdfquad  ~/.config/pdfquad/profiles/dbnl-fulltext.xml ./mybatch -x 1
+pdfquad process dbnl-fulltext.xml ./mybatch -x 1
 ```
 
 ### Summary file (CSV)

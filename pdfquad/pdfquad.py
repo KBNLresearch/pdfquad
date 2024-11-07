@@ -26,7 +26,7 @@ from . import jpegquality
 __version__ = "0.2.a1"
 
 # Create parser
-parser = argparse.ArgumentParser(description="Automated PDF Quality Assessment digitisation batches")
+parser = argparse.ArgumentParser(description="PDF QUality Assessment for Digitisation batches")
 
 def errorExit(msg):
     """Write error to stderr and exit"""
