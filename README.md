@@ -136,7 +136,7 @@ This is a schema for production master PDFs with images in JPEG format that are 
 |Check|Value|
 |:---|:---|
 |PDF version|1.7|
-|Encryption|No encryption|
+|Encryption|Document does not use encryption|
 |Images per page|1|
 |Filter value of image XObject|DCTDecode|
 |Image stream format|JPEG|
@@ -156,7 +156,7 @@ This is a schema for small access PDFs with images in JPEG format that are compr
 |Check|Value|
 |:---|:---|
 |PDF version|1.7|
-|Encryption|No encryption|
+|Encryption|Document does not use encryption|
 |Images per page|1|
 |Filter value of image XObject|DCTDecode|
 |Image stream format|JPEG|
