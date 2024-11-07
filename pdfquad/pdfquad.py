@@ -76,7 +76,7 @@ def parseCommandLine():
 
     parser.add_argument('profile',
                         action="store",
-                        help='validation profile file')
+                        help='validation profile name (use "pdfquad list" to list available profiles)')
     parser.add_argument('batchDir',
                         action="store",
                         help="batch directory")
@@ -104,10 +104,13 @@ def parseCommandLine():
     # Parse arguments
     args = parser.parse_args()
 
-    # Normalise all file paths
-    args.profile = os.path.normpath(args.profile)
+    # Normalise all directory paths
     args.batchDir = os.path.normpath(args.batchDir)
     args.outdir = os.path.normpath(args.outdir)
+
+    # Strip any path info from entered profile
+    _, fName = os.path.split(args.profile)
+    args.profile = fName
 
     # Convert maxpdfs to integer
     args.maxpdfs = int(args.maxpdfs)
@@ -547,6 +550,9 @@ def main():
     outDir = args.outdir
     maxPDFs = args.maxpdfs
     verboseFlag = args.verbose
+
+    # Add profilesDir to profile definition
+    profile = os.path.join(profilesDir, profile)
 
     # Check if files / directories exist
     checkFileExists(profile)
