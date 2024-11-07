@@ -301,6 +301,58 @@ def writeXMLFooter(fileOut):
         f.write(xmlFoot.encode('utf-8'))
 
 
+def findSchema(PDF, schemas):
+    """Find schema based on match with name or parent directory"""
+
+    # Initial value of flag that indicates schema match
+    schemaMatchFlag = False
+    # Initial value of schema reference
+    schemaMatch = "undefined"
+
+    fPath, fName = os.path.split(PDF)
+    parentDir = os.path.basename(fPath)
+
+    for schema in schemas:
+        mType = schema[0]
+        mMatch = schema[1]
+        mPattern = schema[2]
+        mSchema = schema[3]
+        if mType == "parentDirName" and mMatch == "is":
+            if parentDir == mPattern:
+                schemaMatch = mSchema
+                schemaMatchFlag = True
+        elif mType == "parentDirName" and mMatch == "startswith":
+            if parentDir.startswith(mPattern):
+                schemaMatch = mSchema
+                schemaMatchFlag = True
+        elif mType == "parentDirName" and mMatch == "endswith":
+            if parentDir.endswith(mPattern):
+                schemaMatch = mSchema
+                schemaMatchFlag = True
+        elif mType == "parentDirName" and mMatch == "contains":
+            if mPattern in parentDir:
+                schemaMatch = mSchema
+                schemaMatchFlag = True
+        if mType == "fileName" and mMatch == "is":
+            if fName == mPattern:
+                schemaMatch = mSchema
+                schemaMatchFlag = True
+        elif mType == "fileName" and mMatch == "startswith":
+            if fName.startswith(mPattern):
+                schemaMatch = mSchema
+                schemaMatchFlag = True
+        elif mType == "fileName" and mMatch == "endswith":
+            if fName.endswith(mPattern):
+                schemaMatch = mSchema
+                schemaMatchFlag = True
+        elif mType == "fileName" and mMatch == "contains":
+            if mPattern in fName:
+                schemaMatch = mSchema
+                schemaMatchFlag = True
+
+    return schemaMatchFlag, schemaMatch
+
+
 def getProperties(PDF):
     """Extract properties and return result as Element object"""
 
@@ -485,64 +537,19 @@ def processPDF(PDF, verboseFlag, schemas):
     # Create output element for this PDF
     pdfElt = etree.Element("file")
 
-    # File name and parent directory name for this PDF
-
-    fPath, fName = os.path.split(PDF)
-    parentDir = os.path.basename(fPath)
-
     # Initial value of flag that indicates whether PDF passes or fails quality checks
     validationOutcome = "pass"
     # Initial value of flag that indicates whether validation was successful
     validationSuccess = False
-    # Initial value of flag that indicates schema match
-    schemaMatch = False
-    # Initial value of schema reference
-    mySchema = "undefined"
 
     # Select schema based on directory or file name pattern defined in profile
-    for schema in schemas:
-        mType = schema[0]
-        mMatch = schema[1]
-        mPattern = schema[2]
-        mSchema = schema[3]
-        if mType == "parentDirName" and mMatch == "is":
-            if parentDir == mPattern:
-                mySchema = mSchema
-                schemaMatch = True
-        elif mType == "parentDirName" and mMatch == "startswith":
-            if parentDir.startswith(mPattern):
-                mySchema = mSchema
-                schemaMatch = True
-        elif mType == "parentDirName" and mMatch == "endswith":
-            if parentDir.endswith(mPattern):
-                mySchema = mSchema
-                schemaMatch = True
-        elif mType == "parentDirName" and mMatch == "contains":
-            if mPattern in parentDir:
-                mySchema = mSchema
-                schemaMatch = True
-        if mType == "fileName" and mMatch == "is":
-            if fName == mPattern:
-                mySchema = mSchema
-                schemaMatch = True
-        elif mType == "fileName" and mMatch == "startswith":
-            if fName.startswith(mPattern):
-                mySchema = mSchema
-                schemaMatch = True
-        elif mType == "fileName" and mMatch == "endswith":
-            if fName.endswith(mPattern):
-                mySchema = mSchema
-                schemaMatch = True
-        elif mType == "fileName" and mMatch == "contains":
-            if mPattern in fName:
-                mySchema = mSchema
-                schemaMatch = True
+    schemaMatchFlag, mySchema = findSchema(PDF, schemas)
 
     # Extract properties
     propertiesElt = getProperties(PDF)
 
     # Validate extracted properties against schema
-    if schemaMatch:
+    if schemaMatchFlag:
         validationSuccess, validationOutcome, reportElt = validate(mySchema, propertiesElt, verboseFlag)
     else:
         # No schema match
@@ -564,7 +571,7 @@ def processPDF(PDF, verboseFlag, schemas):
     pdfElt.append(schemaElt)
     pdfElt.append(validationSuccessElt)
     pdfElt.append(validationOutcomeElt)
-    if schemaMatch:
+    if schemaMatchFlag:
         pdfElt.append(reportElt)
 
     return pdfElt
