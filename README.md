@@ -149,6 +149,7 @@ This is a schema for production master PDFs with images in JPEG format that are 
 |PageMode|Value is not /UseThumbs (no thumbnails allowed)|
 |Digital signatures|Document does not contain digital signatures|
 |Exceptions|Parsing of the document and its embedded image streams did not result in any exceptions|
+|Open password|Document is not protected with open password|
 
 ### pdf-dbnl-50.sch
 
@@ -170,6 +171,7 @@ This is a schema for small access PDFs with images in JPEG format that are compr
 |PageMode|Value is not /UseThumbs (no thumbnails allowed)|
 |Digital signatures|Document does not contain digital signatures|
 |Exceptions|Parsing of the document and its embedded image streams did not result in any exceptions|
+|Open password|Document is not protected with open password|
 
 ## Output
 
