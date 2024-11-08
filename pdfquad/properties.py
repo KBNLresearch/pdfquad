@@ -9,7 +9,6 @@ Copyright 2024, KB/National Library of the Netherlands
 PDF properties extraction module
 
 """
-
 import os
 import io
 import logging
@@ -254,16 +253,23 @@ def getImageStreamProperties(stream, pageNo):
         else:
             propsStream[key] = value
 
+    # ICC profile name and description
+    iccFlag = False
     try:
-        # ICC profile name and description
         icc = im.info['icc_profile']
-        iccProfile = ImageCms.ImageCmsProfile(io.BytesIO(icc))
-        propsStream['icc_profile_name'] = ImageCms.getProfileName(iccProfile).strip()
-        propsStream['icc_profile_description'] = ImageCms.getProfileDescription(iccProfile).strip()
-    except Exception as e:
-        ex = etree.SubElement(exceptionsStreamElt,'exception')
-        ex.text = str(e)
-        logging.warning(("page {} while extracting ICC profile properties from image stream: {}").format(str(pageNo), str(e)))
+        iccFlag = True
+    except KeyError:
+        pass
+
+    if iccFlag:
+        try:
+            iccProfile = ImageCms.ImageCmsProfile(io.BytesIO(icc))
+            propsStream['icc_profile_name'] = ImageCms.getProfileName(iccProfile).strip()
+            propsStream['icc_profile_description'] = ImageCms.getProfileDescription(iccProfile).strip()
+        except Exception as e:
+            ex = etree.SubElement(exceptionsStreamElt,'exception')
+            ex.text = str(e)
+            logging.warning(("page {} while extracting ICC profile properties from image stream: {}").format(str(pageNo), str(e)))
 
     propsStreamElt = dictionaryToElt('stream', propsStream)
     propsStreamElt.append(exceptionsStreamElt)
