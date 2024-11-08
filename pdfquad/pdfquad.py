@@ -511,7 +511,7 @@ def validate(schema, propertiesElt, verboseFlag):
     """Validate extracted properties against schema"""
 
     # Initial value of validation outcome
-    validationOutcome = "pass"
+    validationOutcome = "Pass"
 
     # Initial value of flag that indicates whether validation ran
     validationSuccess = False
@@ -527,14 +527,14 @@ def validate(schema, propertiesElt, verboseFlag):
     try:
         # Validate properties element against schema
         validationResult = schematron.validate(propertiesElt)
-        # Set status to "fail" if properties didn't pass validation
+        # Set status to "Fail" if properties didn't pass validation
         if not validationResult:
-            validationOutcome = "fail"
+            validationOutcome = "Fail"
         report = schematron.validation_report
         validationSuccess = True
 
     except Exception:
-        validationOutcome = "fail"
+        validationOutcome = "Fail"
         logging.error(("Schematron validation failed for {}").format(schema))
 
     try:
@@ -559,7 +559,7 @@ def processPDF(PDF, verboseFlag, schemas):
     pdfElt = etree.Element("file")
 
     # Initial value of flag that indicates whether PDF passes or fails quality checks
-    validationOutcome = "pass"
+    validationOutcome = "Pass"
     # Initial value of flag that indicates whether validation was successful
     validationSuccess = False
 
@@ -574,7 +574,7 @@ def processPDF(PDF, verboseFlag, schemas):
         validationSuccess, validationOutcome, reportElt = validate(mySchema, propertiesElt, verboseFlag)
     else:
         # No schema match
-        validationOutcome = "fail"
+        validationOutcome = "Fail"
         logging.warning("no schema match")
 
     if not validationSuccess:
