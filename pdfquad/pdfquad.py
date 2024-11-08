@@ -344,8 +344,26 @@ def getProperties(PDF):
     fSizeElt = etree.Element("fileSize")
     fSizeElt.text = str(os.path.getsize(PDF))
 
-    # Parse PDF
-    doc = pymupdf.open(PDF)
+    # Add to properies element
+    propertiesElt.append(fPathElt)
+    propertiesElt.append(fSizeElt)
+
+    # Parse PDF and check for open password
+    openPasswordElt = etree.Element("openPassword")
+    try:
+        doc = pymupdf.open(PDF)
+        rc = doc.authenticate("whatever")
+        if rc == 0:
+            openPasswordElt.text = str(True)
+            propertiesElt.append(openPasswordElt)
+            logging.warning("PDF has open password")
+            return propertiesElt
+        else:
+            openPasswordElt.text = str(False)
+            propertiesElt.append(openPasswordElt)
+    except Exception  as e:
+        logging.warning(("while opening PDF: {}").format(str(e)))
+        return propertiesElt
 
     # Page count
     pages = doc.page_count
@@ -428,7 +446,7 @@ def getProperties(PDF):
                     except Exception as e:
                         ex = etree.SubElement(exceptionsStreamElt,'exception')
                         ex.text = str(e)
-                        logging.warning(("page {} while estimating JPEG quality: {}").format(str(pageNo), str(e)))
+                        logging.warning(("page {} while estimating JPEG quality from image stream: {}").format(str(pageNo), str(e)))
 
                 for key, value in im.info.items():
                     if isinstance(value, bytes):
@@ -470,9 +488,7 @@ def getProperties(PDF):
         # Add page element to pages element
         pagesElt.append(pageElt)
 
-    # Add all child elements to properties element
-    propertiesElt.append(fPathElt)
-    propertiesElt.append(fSizeElt)
+    # Add all remaining elements to properties element
     propertiesElt.append(metadataElt)
     propertiesElt.append(pageModeElt)
     propertiesElt.append(signatureFlagElt)
@@ -542,7 +558,7 @@ def processPDF(PDF, verboseFlag, schemas):
 
     # Select schema based on directory or file name pattern defined in profile
     schemaMatchFlag, mySchema = findSchema(PDF, schemas)
-
+    
     # Extract properties
     propertiesElt = getProperties(PDF)
 
@@ -689,9 +705,18 @@ def main():
         myPDF = os.path.abspath(myPDF)
         pdfResult = processPDF(myPDF, verboseFlag, schemas)
         if len(pdfResult) != 0:
-            noPages = pdfResult.find('properties/noPages').text
-            validationSuccess = pdfResult.find('validationSuccess').text
-            validationOutcome = pdfResult.find('validationOutcome').text
+            try:
+                noPages = pdfResult.find('properties/noPages').text
+            except AttributeError:
+                noPages = "na"
+            try:
+                validationSuccess = pdfResult.find('validationSuccess').text
+            except AttributeError:
+                validationSuccess = "na"
+            try:
+                validationOutcome = pdfResult.find('validationOutcome').text
+            except AttributeError:
+                validationOutcome = "na"
             with open(summaryFile, 'a', newline='', encoding='utf-8') as fSum:
                 writer = csv.writer(fSum)
                 writer.writerow([myPDF, validationSuccess, validationOutcome, noPages, fileOut])
