@@ -11,40 +11,19 @@ Copyright 2024, KB/National Library of the Netherlands
 import sys
 import os
 import shutil
-import io
 import time
 import argparse
 import csv
 import logging
-from lxml import isoschematron
 from lxml import etree
 from . import properties
+from . import schematron
+from . import shared
 
 __version__ = "0.2.a5"
 
 # Create parser
 parser = argparse.ArgumentParser(description="PDF QUality Assessment for Digitisation batches")
-
-
-def errorExit(msg):
-    """Write error to stderr and exit"""
-    msgString = "ERROR: {}\n".format(msg)
-    sys.stderr.write(msgString)
-    sys.exit()
-
-
-def checkFileExists(fileIn):
-    """Check if file exists and exit if not"""
-    if not os.path.isfile(fileIn):
-        msg = "file {} does not exist".format(fileIn)
-        errorExit(msg)
-
-
-def checkDirExists(pathIn):
-    """Check if directory exists and exit if not"""
-    if not os.path.isdir(pathIn):
-        msg = "directory {} does not exist".format(pathIn)
-        errorExit(msg)
 
 
 def parseCommandLine():
@@ -91,106 +70,6 @@ def parseCommandLine():
     return args
 
 
-def listProfilesSchemas(profilesDir, schemasDir):
-    """List all available profiles and schemas"""
-    profiles = os.listdir(profilesDir)
-    print("Available profiles (directory {}):".format(profilesDir))
-    for profile in profiles:
-        print("  - {}".format(profile))
-    schemas = os.listdir(schemasDir)
-    print("Available schemas (directory {}):".format(schemasDir))
-    for schema in schemas:
-        print("  - {}".format(schema))
-    sys.exit()
-
-
-def checkProfilesSchemas(profilesDir, schemasDir):
-    """Check if all profiles and schemas can be read without
-    throwing parse errors"""
-    profiles = os.listdir(profilesDir)
-    for profile in profiles:
-        try:
-            readAsLXMLElt(os.path.join(profilesDir, profile))
-        except Exception:
-            msg = ("error parsing profile {}").format(profile)
-            errorExit(msg)
-    schemas = os.listdir(schemasDir)
-    for schema in schemas:
-        try:
-            schemaElt = readAsLXMLElt(os.path.join(schemasDir, schema))
-        except Exception:
-            msg = ("error parsing schema {}").format(schema)
-            errorExit(msg)
-        try:
-            isoschematron.Schematron(schemaElt)
-        except etree.XSLTParseError:
-            msg = ("XSLT parse error for schema {}").format(schema)
-            errorExit(msg)       
-
-
-def readProfile(profile, schemasDir):
-    """Read a profile and returns list with for each schema
-    element the corresponding type, matching method, matching
-    pattern and schematronj file"""
-
-    # Parse XML tree
-    try:
-        tree = etree.parse(profile)
-        prof = tree.getroot()
-    except Exception:
-        msg = "error parsing {}".format(profile)
-        errorExit(msg)
-
-    # Output list
-    listOut = []
-
-    # Locate schema elements
-    schemas = prof.findall("schema")
-
-    for schema in schemas:
-        try:
-            mType = schema.attrib["type"]
-            if mType not in ["fileName", "parentDirName"]:
-                msg = "'{}' is not a valid 'type' value".format(mType)
-                errorExit(msg)
-        except KeyError:
-            msg = "missing 'type' attribute in profile {}".format(profile)
-            errorExit(msg)
-        try:
-            mMatch = schema.attrib["match"]
-            if mMatch not in ["is", "startswith", "endswith", "contains"]:
-                msg = "'{}' is not a valid 'match' value".format(mMatch)
-                errorExit(msg)
-        except KeyError:
-            msg = "missing 'match' attribute in profile {}".format(profile)
-            errorExit(msg)
-        try:
-            mPattern = schema.attrib["pattern"]
-        except KeyError:
-            msg = "missing 'pattern' attribute in profile {}".format(profile)
-            errorExit(msg)
-
-        schematronFile = os.path.join(schemasDir, schema.text)
-        checkFileExists(schematronFile)
-
-        listOut.append([mType, mMatch, mPattern, schematronFile])
-
-    return listOut
-
-
-def readAsLXMLElt(xmlFile):
-    """Parse XML file with lxml and return result as element object
-    (not the same as Elementtree object!)
-    """
-
-    f = open(xmlFile, 'r', encoding="utf-8")
-    # Note we're using lxml.etree here rather than elementtree
-    resultAsLXMLElt = etree.parse(f)
-    f.close()
-
-    return resultAsLXMLElt
-
-
 def getFilesFromTree(rootDir, extensionString):
     """Walk down whole directory tree (including all subdirectories) and
     return list of those files whose extension contains user defined string
@@ -217,17 +96,6 @@ def getFilesFromTree(rootDir, extensionString):
     return filesList
 
 
-def summariseSchematron(report):
-    """Return summarized version of Schematron report with only output of
-    failed tests"""
-
-    for elem in report.iter():
-        if elem.tag == "{http://purl.oclc.org/dsdl/svrl}fired-rule":
-            elem.getparent().remove(elem)
-
-    return report
-
-
 def writeXMLHeader(fileOut):
     """Write XML header"""
     xmlHead = "<?xml version='1.0' encoding='UTF-8'?>\n"
@@ -243,103 +111,6 @@ def writeXMLFooter(fileOut):
         f.write(xmlFoot.encode('utf-8'))
 
 
-def findSchema(PDF, schemas):
-    """Find schema based on match with name or parent directory"""
-
-    # Initial value of flag that indicates schema match
-    schemaMatchFlag = False
-    # Initial value of schema reference
-    schemaMatch = "undefined"
-
-    fPath, fName = os.path.split(PDF)
-    parentDir = os.path.basename(fPath)
-
-    for schema in schemas:
-        mType = schema[0]
-        mMatch = schema[1]
-        mPattern = schema[2]
-        mSchema = schema[3]
-        if mType == "parentDirName" and mMatch == "is":
-            if parentDir == mPattern:
-                schemaMatch = mSchema
-                schemaMatchFlag = True
-        elif mType == "parentDirName" and mMatch == "startswith":
-            if parentDir.startswith(mPattern):
-                schemaMatch = mSchema
-                schemaMatchFlag = True
-        elif mType == "parentDirName" and mMatch == "endswith":
-            if parentDir.endswith(mPattern):
-                schemaMatch = mSchema
-                schemaMatchFlag = True
-        elif mType == "parentDirName" and mMatch == "contains":
-            if mPattern in parentDir:
-                schemaMatch = mSchema
-                schemaMatchFlag = True
-        if mType == "fileName" and mMatch == "is":
-            if fName == mPattern:
-                schemaMatch = mSchema
-                schemaMatchFlag = True
-        elif mType == "fileName" and mMatch == "startswith":
-            if fName.startswith(mPattern):
-                schemaMatch = mSchema
-                schemaMatchFlag = True
-        elif mType == "fileName" and mMatch == "endswith":
-            if fName.endswith(mPattern):
-                schemaMatch = mSchema
-                schemaMatchFlag = True
-        elif mType == "fileName" and mMatch == "contains":
-            if mPattern in fName:
-                schemaMatch = mSchema
-                schemaMatchFlag = True
-
-    return schemaMatchFlag, schemaMatch
-
-
-def validate(schema, propertiesElt, verboseFlag):
-    """Validate extracted properties against schema"""
-
-    # Initial value of validation outcome
-    validationOutcome = "Pass"
-
-    # Initial value of flag that indicates whether validation ran
-    validationSuccess = False
-
-    # Element used to store validation report
-    reportElt = etree.Element("schematronReport")
-    # Get schema as lxml.etree element
-    mySchemaElt = readAsLXMLElt(schema)
-    # Start Schematron magic ...
-    schematron = isoschematron.Schematron(mySchemaElt,
-                                          store_report=True)
-
-    try:
-        # Validate properties element against schema
-        validationResult = schematron.validate(propertiesElt)
-        # Set status to "Fail" if properties didn't pass validation
-        if not validationResult:
-            validationOutcome = "Fail"
-        report = schematron.validation_report
-        validationSuccess = True
-
-    except Exception:
-        validationOutcome = "Fail"
-        logging.error(("Schematron validation failed for {}").format(schema))
-
-    try:
-        # Re-parse Schematron report
-        report = etree.fromstring(str(report))
-        # Make report less verbose
-        if not verboseFlag:
-            report = summariseSchematron(report)
-        # Add to report element
-        reportElt.append(report)
-    except Exception:
-        # No report available because Schematron validation failed
-        pass
-
-    return validationSuccess, validationOutcome, reportElt
-
-
 def processPDF(PDF, verboseFlag, schemas):
     """Process one PDF"""
 
@@ -352,14 +123,16 @@ def processPDF(PDF, verboseFlag, schemas):
     validationSuccess = False
 
     # Select schema based on directory or file name pattern defined in profile
-    schemaMatchFlag, mySchema = findSchema(PDF, schemas)
+    schemaMatchFlag, mySchema = schematron.findSchema(PDF, schemas)
     
     # Extract properties
     propertiesElt = properties.getProperties(PDF)
 
     # Validate extracted properties against schema
     if schemaMatchFlag:
-        validationSuccess, validationOutcome, reportElt = validate(mySchema, propertiesElt, verboseFlag)
+        validationSuccess, validationOutcome, reportElt = schematron.validate(mySchema,
+                                                                              propertiesElt,
+                                                                              verboseFlag)
     else:
         # No schema match
         validationOutcome = "Fail"
@@ -412,8 +185,8 @@ def main():
     schemasDir = os.path.join(configpath, "schemas")
 
     # Check if package profiles and schemas dirs exist
-    checkDirExists(profilesDirPackage)
-    checkDirExists(schemasDirPackage)
+    shared.checkDirExists(profilesDirPackage)
+    shared.checkDirExists(schemasDirPackage)
 
     # Copy profiles and schemas to respective dirs in config dir
     if not os.path.isdir(profilesDir):
@@ -422,7 +195,7 @@ def main():
         shutil.copytree(schemasDirPackage, schemasDir)
 
     # Check if all profiles and schemas can be parsed
-    checkProfilesSchemas(profilesDir, schemasDir)
+    schematron.checkProfilesSchemas(profilesDir, schemasDir)
 
     # Get input from command line
     args = parseCommandLine()
@@ -436,7 +209,7 @@ def main():
         maxPDFs = int(args.maxpdfs)
         verboseFlag = args.verbose
     elif action == "list":
-        listProfilesSchemas(profilesDir, schemasDir)
+        schematron.listProfilesSchemas(profilesDir, schemasDir)
     elif action is None:
         print('')
         parser.print_help()
@@ -446,14 +219,14 @@ def main():
     profile = os.path.join(profilesDir, profile)
 
     # Check if files / directories exist
-    checkFileExists(profile)
-    checkDirExists(batchDir)
-    checkDirExists(outDir)
+    shared.checkFileExists(profile)
+    shared.checkDirExists(batchDir)
+    shared.checkDirExists(outDir)
 
     # Check if outDir is writable
     if not os.access(outDir, os.W_OK):
         msg = ("directory {} is not writable".format(outDir))
-        errorExit(msg)
+        shared.errorExit(msg)
 
     # Batch dir name
     batchDirName = os.path.basename(batchDir)
@@ -466,7 +239,7 @@ def main():
                         format='%(asctime)s - %(levelname)s - %(message)s')
 
     # Get schema patterns and locations from profile
-    schemas = readProfile(profile, schemasDir)
+    schemas = schematron.readProfile(profile, schemasDir)
 
     # Summary file with quality check status (pass/fail) and no of pages
     summaryFile = os.path.normpath(("{}_summary.csv").format(prefixBatch))
