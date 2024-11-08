@@ -418,40 +418,59 @@ def getProperties(PDF):
 def getPageProperties(doc, page, pageNo):
     """Extract properties for one page and return result as Element object"""
 
+    # Create element object to store all page level properties
     pageElt = etree.Element("page")
     pageElt.attrib["number"] = str(pageNo)
     images = page.get_images(full=False)
     for image in images:
-        imageElt = etree.Element("image")
-        # Store properties at PDF object dictionary level to a dictionary
-        propsDict = {}
-        propsDict['xref'] = image[0]
-        #propsDict['smask'] = image[1]
-        propsDict['width'] = image[2]
-        propsDict['height'] = image[3]
-        propsDict['bpc'] = image[4]
-        propsDict['colorspace'] = image[5]
-        propsDict['altcolorspace'] = image[6]
-        #propsDict['name'] = image[7]
-        propsDict['filter'] = image[8]
-
-        # Get raw image stream from xref           
-        xref = propsDict['xref']
-        stream = doc.xref_stream_raw(xref)
-
-        # Extract stream properties
-        propsStreamElt = getImageStreamProperties(stream, pageNo)
-
-        # Dictionaries to element objects
-        propsDictElt = dictionaryToElt('dict', propsDict)
-        # Add properties to image element
-        imageElt.append(propsDictElt)
-        imageElt.append(propsStreamElt)
-
+        imageElt = getImageProperties(doc, image, pageNo)
         # Add image element to page element
         pageElt.append(imageElt)
-    
+
     return pageElt
+
+
+def getImageProperties(doc, image, pageNo):
+    """Extract image properties and return result as Element object"""
+
+    # Create element object to store all image level properties
+    imageElt = etree.Element("image")
+
+    # Extract dictionary-level properties
+    propsDictElt = getImageDictProperties(doc, image, pageNo)
+
+    # Get raw image stream from xref           
+    xref = int(propsDictElt.find('xref').text)
+    stream = doc.xref_stream_raw(xref)
+    
+    # Extract stream properties
+    propsStreamElt = getImageStreamProperties(stream, pageNo)
+
+    # Add properties to image element
+    imageElt.append(propsDictElt)
+    imageElt.append(propsStreamElt)
+
+    return imageElt
+
+def getImageDictProperties(doc, image, pageNo):
+    """Extract image dictionary properties and return result as Element object"""
+
+    # Store properties at PDF object dictionary level to a dictionary
+    propsDict = {}
+    propsDict['xref'] = image[0]
+    #propsDict['smask'] = image[1]
+    propsDict['width'] = image[2]
+    propsDict['height'] = image[3]
+    propsDict['bpc'] = image[4]
+    propsDict['colorspace'] = image[5]
+    propsDict['altcolorspace'] = image[6]
+    #propsDict['name'] = image[7]
+    propsDict['filter'] = image[8]
+
+    # Dictionary to element object
+    propsDictElt = dictionaryToElt('dict', propsDict)
+
+    return propsDictElt
 
 
 def getImageStreamProperties(stream, pageNo):
@@ -459,7 +478,7 @@ def getImageStreamProperties(stream, pageNo):
 
     # Dictionary for storing stream properties
     propsStream = {}
-    # Element for storing sttream-level exceptions
+    # Element for storing stream-level exceptions
     exceptionsStreamElt = etree.Element("exceptions")
 
     try:
