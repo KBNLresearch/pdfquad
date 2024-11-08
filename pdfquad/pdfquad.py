@@ -404,20 +404,20 @@ def getProperties(PDF):
         for image in images:
             imageElt = etree.Element("image")
             exceptionsStreamElt = etree.Element("exceptions")
-            # Store PDF object level properties to dictionary
-            propsPDF = {}
-            propsPDF['xref'] = image[0]
-            #propsPDF['smask'] = image[1]
-            propsPDF['width'] = image[2]
-            propsPDF['height'] = image[3]
-            propsPDF['bpc'] = image[4]
-            propsPDF['colorspace'] = image[5]
-            propsPDF['altcolorspace'] = image[6]
-            #propsPDF['name'] = image[7]
-            propsPDF['filter'] = image[8]
+            # Store properties at PDF object dictionary level to a dictionary
+            propsDict = {}
+            propsDict['xref'] = image[0]
+            #propsDict['smask'] = image[1]
+            propsDict['width'] = image[2]
+            propsDict['height'] = image[3]
+            propsDict['bpc'] = image[4]
+            propsDict['colorspace'] = image[5]
+            propsDict['altcolorspace'] = image[6]
+            #propsDict['name'] = image[7]
+            propsDict['filter'] = image[8]
 
             # Read raw image stream data from xref id
-            xref = propsPDF['xref']
+            xref = propsDict['xref']
             imageReadSuccess = False
             propsStream = {}
             stream = doc.xref_stream_raw(xref)
@@ -481,11 +481,11 @@ def getProperties(PDF):
                     logging.warning(("page {} while extracting ICC profile properties from image stream: {}").format(str(pageNo), str(e)))
 
             # Dictionaries to element objects
-            propsPDFElt = dictionaryToElt('pdf', propsPDF)
+            propsDictElt = dictionaryToElt('dict', propsDict)
             propsStreamElt = dictionaryToElt('stream', propsStream)
             propsStreamElt.append(exceptionsStreamElt)
             # Add properties to image element
-            imageElt.append(propsPDFElt)
+            imageElt.append(propsDictElt)
             imageElt.append(propsStreamElt)
 
             # Add image element to page element

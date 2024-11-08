@@ -20,8 +20,8 @@
         <s:assert test="(count(image) = 1)">Unexpected number of images on page (expected: 1)</s:assert> 
     </s:rule>
 
-    <!-- Checks at PDF object level -->
-    <s:rule context="//properties/pages/page/image/pdf">
+    <!-- Checks at PDF object dictionary level -->
+    <s:rule context="//properties/pages/page/image/dict">
         <!-- Check on expected filter value for JPEG encoded image data -->
         <s:assert test="(filter = 'DCTDecode')">Unexpected filter value (expected: DCTDecode)</s:assert>
     </s:rule>
@@ -44,15 +44,15 @@
         <s:assert test="(count(exceptions/exception) = 0)">Properties extraction at stream level resulted in one or more exceptions</s:assert>
     </s:rule>
 
-    <!-- Checks at combined PDF object and image stream levels -->
+    <!-- Checks at combined PDF object dictionary and image stream levels -->
     <s:rule context="//properties/pages/page/image">
         <!-- Check on presence of ICC profile, which can be embedded as a PDF object, in the JPEG image stream, or both -->
-        <s:assert test="(pdf/colorspace = 'ICCBased') or (stream/icc_profile)">Missing embedded ICC profile</s:assert>
+        <s:assert test="(dict/colorspace = 'ICCBased') or (stream/icc_profile)">Missing embedded ICC profile</s:assert>
         <!-- Consistency checks on width, height values at pdf and image stream levels -->
-        <s:assert test="(pdf/width = stream/width)">Width values at PDF and image stream levels are not the same</s:assert>
-        <s:assert test="(pdf/height = stream/height)">Height values at PDF and image stream levels are not the same</s:assert>
+        <s:assert test="(dict/width = stream/width)">Width values at PDF and image stream levels are not the same</s:assert>
+        <s:assert test="(dict/height = stream/height)">Height values at PDF and image stream levels are not the same</s:assert>
         <!-- Consistency check on bpc values at pdf and image stream levels -->
-        <s:assert test="(pdf/bpc = stream/bpc)">Bit per component values at PDF and image stream levels are not the same</s:assert>
+        <s:assert test="(dict/bpc = stream/bpc)">Bit per component values at PDF and image stream levels are not the same</s:assert>
     </s:rule>
 
     <!-- Checks at properties level -->
