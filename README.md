@@ -217,10 +217,6 @@ file,validationSuccess,validationOutcome,noPages,fileOut
 /home/johan/pdfquad-test/mybatch/20241105/_boe012192401/300dpi-50/_boe012192401_01.pdf,True,fail,346,/home/johan/pdfquad-test/pq_mybatch_001.xml
 ```
 
-### Log file
-
-Finally Pdfquad writes a log (.log) file. This is mainly included for development, and may be removed in future versions.
-
 ## Licensing
 
 Pdfquad is released under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
