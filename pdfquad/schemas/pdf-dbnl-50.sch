@@ -63,6 +63,8 @@
         <s:assert test="(signatureFlag  = -1)">Document contains one or more digital signatures</s:assert>
         <!-- Check on open password -->
         <s:assert test="(openPassword  = 'False')">Document is protected with open password</s:assert>
+        <!-- Check on absence of any exceptions while parsing at pdf level -->
+        <s:assert test="(count(exceptions/exception) = 0)">Parsing at PDF level resulted in one or more exceptions</s:assert>
     </s:rule>
 
 </s:pattern>

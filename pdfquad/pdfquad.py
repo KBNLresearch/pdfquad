@@ -338,6 +338,9 @@ def getProperties(PDF):
     # Create element object to store all properties
     propertiesElt = etree.Element("properties")
 
+    # Element to store exceptions at file level
+    exceptionsFileElt = etree.Element("exceptions")
+
     # Create and fill descriptive elements
     fPathElt = etree.Element("filePath")
     fPathElt.text = PDF
@@ -362,6 +365,9 @@ def getProperties(PDF):
             openPasswordElt.text = str(False)
             propertiesElt.append(openPasswordElt)
     except Exception  as e:
+        ex = etree.SubElement(exceptionsFileElt,'exception')
+        ex.text = str(e)
+        propertiesElt.append(exceptionsFileElt)
         logging.warning(("while opening PDF: {}").format(str(e)))
         return propertiesElt
 
@@ -496,6 +502,7 @@ def getProperties(PDF):
     noPagesElt.text = str(pages)
     propertiesElt.append(noPagesElt)
     propertiesElt.append(pagesElt)
+    propertiesElt.append(exceptionsFileElt)
 
     return propertiesElt
 
