@@ -7,7 +7,7 @@
     <s:title>DBNL profile checks</s:title>
 
     <!-- Checks at PDF metadata level -->
-    <s:rule context="/properties/meta">
+    <s:rule context="//properties/meta">
         <!-- Check on PDF version -->
         <s:assert test="(format = 'PDF 1.7')">Unexpected PDF version (expected: 1.7)</s:assert>
         <!-- Check on encryption -->
@@ -15,19 +15,19 @@
     </s:rule>
 
     <!-- Checks at page level -->
-    <s:rule context="/properties/pages/page">
+    <s:rule context="//properties/pages/page">
         <!-- Check on presence of only 1 image for each page -->
         <s:assert test="(count(image) = 1)">Unexpected number of images on page (expected: 1)</s:assert> 
     </s:rule>
 
     <!-- Checks at PDF object level -->
-    <s:rule context="/properties/pages/page/image/pdf">
+    <s:rule context="//properties/pages/page/image/pdf">
         <!-- Check on expected filter value for JPEG encoded image data -->
         <s:assert test="(filter = 'DCTDecode')">Unexpected filter value (expected: DCTDecode)</s:assert>
     </s:rule>
 
     <!-- Checks at image stream level -->
-    <s:rule context="/properties/pages/page/image/stream">
+    <s:rule context="//properties/pages/page/image/stream">
         <!-- Check on expected format of the image stream -->
         <s:assert test="(format = 'JPEG')">Unexpected image stream format (expected: JPEG)</s:assert>
         <!-- Check on horizontal and vertical resolution (with tolerance of +/- 1 ppi) -->
@@ -46,7 +46,7 @@
     </s:rule>
 
     <!-- Checks at combined PDF object and image stream levels -->
-    <s:rule context="/properties/pages/page/image">
+    <s:rule context="//properties/pages/page/image">
         <!-- Check on presence of ICC profile, which can be embedded as a PDF object, in the JPEG image stream, or both -->
         <s:assert test="(pdf/colorspace = 'ICCBased') or (stream/icc_profile)">Missing embedded ICC profile</s:assert>
         <!-- Consistency checks on width, height values at pdf and image stream levels -->
@@ -57,7 +57,7 @@
     </s:rule>
 
     <!-- Checks at properties level -->
-    <s:rule context="/properties">
+    <s:rule context="//properties">
         <!-- Check on PageMode value to ensure document doesn't open with thumbnails -->
         <s:assert test="(PageMode  != '/UseThumbs')">PageMode value is /UseThumbs</s:assert>
         <!-- Check on signatureFlag value to ensure document doesn't contain digital signatures -->
