@@ -404,6 +404,7 @@ def getProperties(PDF):
             except Exception as e:
                 ex = etree.SubElement(exceptionsStreamElt,'exception')
                 ex.text = str(e)
+                logging.warning(("page {} while reading image stream: {}").format(str(pageNo), str(e)))
 
             if imageReadSuccess:
                 propsStream['format'] = im.format
@@ -427,6 +428,7 @@ def getProperties(PDF):
                     except Exception as e:
                         ex = etree.SubElement(exceptionsStreamElt,'exception')
                         ex.text = str(e)
+                        logging.warning(("page {} while estimating JPEG quality: {}").format(str(pageNo), str(e)))
 
                 for key, value in im.info.items():
                     if isinstance(value, bytes):
@@ -452,6 +454,7 @@ def getProperties(PDF):
                 except Exception as e:
                     ex = etree.SubElement(exceptionsStreamElt,'exception')
                     ex.text = str(e)
+                    logging.warning(("page {} while extracting ICC profile properties from image stream: {}").format(str(pageNo), str(e)))
 
             # Dictionaries to element objects
             propsPDFElt = dictionaryToElt('pdf', propsPDF)
