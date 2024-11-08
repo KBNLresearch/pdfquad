@@ -61,6 +61,8 @@
         <s:assert test="(PageMode  != '/UseThumbs')">PageMode value is /UseThumbs</s:assert>
         <!-- Check on signatureFlag value to ensure document doesn't contain digital signatures -->
         <s:assert test="(signatureFlag  = -1)">Document contains one or more digital signatures</s:assert>
+        <!-- Check on open password -->
+        <s:assert test="(openPassword  = False)">Document is protected with open password</s:assert>
     </s:rule>
 
 </s:pattern>
