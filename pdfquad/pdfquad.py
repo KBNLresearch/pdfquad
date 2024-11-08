@@ -437,7 +437,7 @@ def getImageProperties(doc, image, pageNo):
     imageElt = etree.Element("image")
 
     # Extract dictionary-level properties
-    propsDictElt = getImageDictProperties(doc, image, pageNo)
+    propsDictElt = getImageDictProperties(image, pageNo)
 
     # Get raw image stream from xref           
     xref = int(propsDictElt.find('xref').text)
@@ -452,7 +452,8 @@ def getImageProperties(doc, image, pageNo):
 
     return imageElt
 
-def getImageDictProperties(doc, image, pageNo):
+
+def getImageDictProperties(image, pageNo):
     """Extract image dictionary properties and return result as Element object"""
 
     # Store properties at PDF object dictionary level to a dictionary
