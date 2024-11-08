@@ -11445,7 +11445,7 @@
   </properties>
   <schema>/home/johan/.config/pdfquad/schemas/pdf-dbnl-85.sch</schema>
   <validationSuccess>True</validationSuccess>
-  <validationOutcome>pass</validationOutcome>
+  <validationOutcome>Pass</validationOutcome>
   <schematronReport>
     <svrl:schematron-output xmlns:svrl="http://purl.oclc.org/dsdl/svrl" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:schold="http://www.ascc.net/xml/schematron" xmlns:sch="http://www.ascc.net/xml/schematron" xmlns:iso="http://purl.oclc.org/dsdl/schematron" title="" schemaVersion="">
   <!--   
@@ -22901,7 +22901,7 @@
   </properties>
   <schema>/home/johan/.config/pdfquad/schemas/pdf-dbnl-50.sch</schema>
   <validationSuccess>True</validationSuccess>
-  <validationOutcome>fail</validationOutcome>
+  <validationOutcome>Fail</validationOutcome>
   <schematronReport>
     <svrl:schematron-output xmlns:svrl="http://purl.oclc.org/dsdl/svrl" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:schold="http://www.ascc.net/xml/schematron" xmlns:sch="http://www.ascc.net/xml/schematron" xmlns:iso="http://purl.oclc.org/dsdl/schematron" title="" schemaVersion="">
   <!--   
