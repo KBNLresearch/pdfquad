@@ -647,9 +647,7 @@ def main():
     prefixBatch = ("{}_{}").format(prefixOut, batchDirName)
     
     # Set up logging
-    logFile = os.path.normpath(("{}.log").format(prefixBatch))
-    logFile = os.path.join(outDir, logFile)
-    logging.basicConfig(handlers=[logging.FileHandler(logFile, 'a', 'utf-8')],
+    logging.basicConfig(handlers=[logging.StreamHandler(sys.stdout)],
                         level=logging.INFO,
                         format='%(asctime)s - %(levelname)s - %(message)s')
 
