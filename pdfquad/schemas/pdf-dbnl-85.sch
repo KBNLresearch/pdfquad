@@ -26,6 +26,28 @@
         <s:assert test="(encryption = 'None')">PDF uses encryption</s:assert>
     </s:rule>
 
+    <!-- Checks at PDF annotations level -->
+    <s:rule context="//properties/annotations">
+        <!-- Check on absence of watermark annotations -->
+        <s:assert test="(count(annotation[text() = '/Watermark']) = 0)">PDF contains Watermark annotation</s:assert>
+        <!-- Check on absence of other unwanted annotations 
+        See Table 169 (Annotation types) in ISO 32000 - 2008
+        -->
+        <s:assert test="(count(annotation[text() = '/Screen']) = 0)">PDF contains Screen annotation</s:assert>
+        <s:assert test="(count(annotation[text() = '/Movie']) = 0)">PDF contains Movie annotation</s:assert>
+        <s:assert test="(count(annotation[text() = '/3D']) = 0)">PDF contains 3D annotation</s:assert>
+        <s:assert test="(count(annotation[text() = '/Sound']) = 0)">PDF contains Sound annotation</s:assert>
+        <s:assert test="(count(annotation[text() = '/FileAttachment']) = 0)">PDF contains FileAttachment annotation</s:assert>
+        <s:assert test="(count(annotation[text() = '/Link']) = 0)">PDF contains Link annotation</s:assert>
+        <s:assert test="(count(annotation[text() = '/Ink']) = 0)">PDF contains Ink annotation</s:assert>
+        <s:assert test="(count(annotation[text() = '/Popup']) = 0)">PDF contains Popup annotation</s:assert>
+        <s:assert test="(count(annotation[text() = '/Widget']) = 0)">PDF contains Widget annotation</s:assert>
+        <s:assert test="(count(annotation[text() = '/Polygon']) = 0)">PDF contains Polygon annotation</s:assert>
+        <s:assert test="(count(annotation[text() = '/Text']) = 0)">PDF contains Text annotation</s:assert>
+        <s:assert test="(count(annotation[text() = '/FreeText']) = 0)">PDF contains FreeText annotation</s:assert>
+        <s:assert test="(count(annotation[text() = '/SVG']) = 0)">PDF contains SVG annotation</s:assert>
+    </s:rule>
+
     <!-- Checks at page level -->
     <s:rule context="//properties/pages/page">
         <!-- Check on presence of only 1 image for each page -->
