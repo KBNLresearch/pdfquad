@@ -135,23 +135,27 @@ This is a schema for production master PDFs with images in JPEG format that are 
 
 |Check|Value|
 |:---|:---|
+|Thumbnails|Document does not open with thumbnails|
+|File attachments|Document does not contain file attachments|
+|Digital signatures|Document does not contain digital signatures|
+|JavaScript|Document does not contain JavaScript|
+|Open password|Document is not protected with open password|
+|Exceptions, PDF|Parsing at PDF level did not result in any exceptions|
 |PDF version|1.7|
 |Encryption|Document does not use encryption|
-|Images per page|1|
+|Annotations|Document does not contain WaterMark, Screen, Movie, 3D, Sound, FileAttachment, Link, Ink, Popup, Widget, Polygon, Text, FreeText or SVG annotations|
+|Optional Content|Document does not contain any optional content groups|
+|Images per page|Each page contains exactly 1 image|
 |Watermarks|Document does not contain watermarks|
-|Filter value of image XObject|DCTDecode|
+|ICC profile|Each image contains an ICC profile, which is either defined as a PDF object, or embedded in the image stream|
+|Width, height|Image XObject dictionary values and image stream values are identical|
+|Bits per component|Image XObject dictionary values and image stream values are identical|
+|Filter value of Image XObject dictionary|DCTDecode|
 |Image stream format|JPEG|
 |Image stream resolution (ppi)|Within range \[299, 301\]|
 |Image stream color components|3|
 |Image stream JPEG Quality|Within range \[83, 87\]|
-|ICC profile|Defined as either PDF object, or embedded in image stream|
-|Width, height|Image XObject values and image stream values are identical|
-|Bits per component|Image XObject values and image stream values are identical|
-|PageMode|Value is not /UseThumbs (no thumbnails allowed)|
-|Digital signatures|Document does not contain digital signatures|
-|Stream exceptions, stream|Parsing of the embedded image streams did not result in any exceptions|
-|Open password|Document is not protected with open password|
-|PDF exceptions, PDF|Parsing at PDF level did not result in any exceptions|
+|Exceptions, stream|Parsing of the image streams did not result in any exceptions|
 
 ### pdf-dbnl-50.sch
 
@@ -159,23 +163,27 @@ This is a schema for small access PDFs with images in JPEG format that are compr
 
 |Check|Value|
 |:---|:---|
+|Thumbnails|Document does not open with thumbnails|
+|File attachments|Document does not contain file attachments|
+|Digital signatures|Document does not contain digital signatures|
+|JavaScript|Document does not contain JavaScript|
+|Open password|Document is not protected with open password|
+|Exceptions, PDF|Parsing at PDF level did not result in any exceptions|
 |PDF version|1.7|
 |Encryption|Document does not use encryption|
-|Images per page|1|
+|Annotations|Document does not contain WaterMark, Screen, Movie, 3D, Sound, FileAttachment, Link, Ink, Popup, Widget, Polygon, Text, FreeText or SVG annotations|
+|Optional Content|Document does not contain any optional content groups|
+|Images per page|Each page contains exactly 1 image|
 |Watermarks|Document does not contain watermarks|
-|Filter value of image XObject|DCTDecode|
+|ICC profile|Each image contains an ICC profile, which is either defined as a PDF object, or embedded in the image stream|
+|Width, height|Image XObject dictionary values and image stream values are identical|
+|Bits per component|Image XObject dictionary values and image stream values are identical|
+|Filter value of Image XObject dictionary|DCTDecode|
 |Image stream format|JPEG|
 |Image stream resolution (ppi)|Within range \[299, 301\]|
 |Image stream color components|3|
 |Image stream JPEG Quality|Within range \[48, 52\]|
-|ICC profile|Defined as either PDF object, or embedded in image stream|
-|Width, height|Image XObject values and image stream values are identical|
-|Bits per component|Image XObject values and image stream values are identical|
-|PageMode|Value is not /UseThumbs (no thumbnails allowed)|
-|Digital signatures|Document does not contain digital signatures|
-|Stream exceptions, stream|Parsing of the embedded image streams did not result in any exceptions|
-|Open password|Document is not protected with open password|
-|PDF exceptions, PDF|Parsing at PDF level did not result in any exceptions|
+|Exceptions, stream|Parsing of the image streams did not result in any exceptions|
 
 ## Output
 
