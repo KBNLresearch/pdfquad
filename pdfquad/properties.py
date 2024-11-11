@@ -114,6 +114,20 @@ def getProperties(PDF):
     signatureFlagElt = etree.Element("signatureFlag")
     signatureFlagElt.text = str(signatureFlag)
 
+    # Element object for storing annotation types
+    annotsElt =  etree.Element("annotations")
+
+    # Iterate over all objects and check for annotations
+    # This doesn't work for Watermark annotations that are wrapped inside
+    # stream objects!
+    xreflen = doc.xref_length() # number of PDF objects
+    for xref in range(1, xreflen):
+        type = doc.xref_get_key(xref, "Type")[1]
+        subtype = doc.xref_get_key(xref, "Subtype")[1]
+        if type =="/Annot":
+            annotElt = etree.SubElement(annotsElt,'annotation')
+            annotElt.text = subtype
+
     # Wrapper element for pages output
     pagesElt = etree.Element("pages")
 
@@ -128,6 +142,7 @@ def getProperties(PDF):
     propertiesElt.append(metadataElt)
     propertiesElt.append(pageModeElt)
     propertiesElt.append(signatureFlagElt)
+    propertiesElt.append(annotsElt)
     noPagesElt = etree.Element("noPages")
     noPagesElt.text = str(pages)
     propertiesElt.append(noPagesElt)
@@ -151,17 +166,26 @@ def getPageProperties(doc, page, pageNo):
         # Add image element to page element
         pageElt.append(imageElt)
 
-    # Check if page contains watermark annotations
+    # Check for watermark annotations, which somehow are exclude from document-level check
     # Source: https://github.com/pymupdf/PyMuPDF/discussions/1855#discussioncomment-3324039
-    containsWatermark = False
-    page.clean_contents()
-    cont = bytearray(page.read_contents())
-    if cont.find(b"/Subtype/Watermark") > 0:
-        containsWatermark = True
 
-    containsWatermarkElt = etree.Element("containsWatermark")
-    containsWatermarkElt.text = str(containsWatermark)
-    pageElt.append(containsWatermarkElt)
+    # Element object for storing annotation types
+    annotsElt =  etree.Element("annotations")
+    page.clean_contents()
+
+    xref = page.get_contents()[0]  # get xref of resulting /Contents object
+    cont = bytearray(page.read_contents())  # read the contents source as a (modifyable) bytearray
+    if cont.find(b"/Subtype/Watermark") > 0:  # this will confirm a marked-content watermark is present
+        annotElt = etree.SubElement(annotsElt,'annotation')
+        annotElt.text = "Watermark"
+
+    cont = bytearray(page.read_contents())  # read the contents source as a (modifyable) bytearray
+    if cont.find(b"/Subtype/Watermark") > 0:  # this will confirm a marked-content watermark is present
+        print("marked-content watermark present")
+
+    # TODO also check for Action, e.g. JavaScript actions.
+
+    pageElt.append(annotsElt)
 
     return pageElt
 
