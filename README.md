@@ -20,31 +20,32 @@ Then run pdfquad once:
 pdfquad
 ```
 
-Depending on your system, pdfquad will create a folder named `pdfquad` in one of the following locations: 
+Depending on your system, pdfquad will create a folder named *pdfquad* in one of the following locations: 
 
-- For Linux, it will use the location defined by environment variable `$XDG_CONFIG_HOME`. If this variable is not set, it will use the `.config` directory in the user's home folder (e.g. `/home/johan/.config/pdfquad`). Note that the `.config` directory is hidden by default.
-- For Windows, it will use the `AppData\Local` folder (e.g. `C:\Users\johan\AppData\Local\pdfquad`).
+- For Linux, it will use the location defined by environment variable `$XDG_CONFIG_HOME`. If this variable is not set, it will use the *.config* directory in the user's home folder (e.g. `/home/johan/.config/pdfquad`). Note that the *.config* directory is hidden by default.
+- For Windows, it will use the *AppData\Local* folder (e.g. `C:\Users\johan\AppData\Local\pdfquad`).
 
-The folder contains two subdirectories named `profiles` and `schemas`, which are explained in the "Profiles" and "Schemas" sections below.
+The folder contains two subdirectories named *profiles* and *schemas*, which are explained in the "Profiles" and "Schemas" sections below.
 
 ## Command-line syntax
 
 The general syntax of pdfquad is:
 
 ```
-usage: pdfquad [-h] [--version] {process,list} ...
+usage: pdfquad [-h] [--version] {process,list,copyps} ...
 ```
 
-Pdfquad has two sub-commands:
+Pdfquad has three sub-commands:
 
 |Command|Description|
 |:-----|:--|
-|`process`|Process a batch.|
-|`list`|List available profiles and schemas.|
+|process|Process a batch.|
+|list|List available profiles and schemas.|
+|copyps|Copy default profiles and schemas to user directory.|
 
 ### process command
 
-Run pdfquad with the `process` command to process a batch. The syntax is:
+Run pdfquad with the *process* command to process a batch. The syntax is:
 
 ```
 usage: pdfquad process [-h] [--maxpdfs MAXPDFS] [--prefixout PREFIXOUT]
@@ -52,21 +53,21 @@ usage: pdfquad process [-h] [--maxpdfs MAXPDFS] [--prefixout PREFIXOUT]
                        profile batchDir
 ```
 
-The `process` command expects the following positional arguments: 
+The *process* command expects the following positional arguments: 
 
 |Argument|Description|
 |:-----|:--|
-|`profile`|This defines the validation profile. Note that any file paths entered here will be ignored, as Pdfquad only accepts  profiles from the profiles directory. You can just enter the file name without the path. Use the `list` command to list all available profiles.|
-|`batchDir`|This defines the batch directory that will be analyzed.|
+|profile|This defines the validation profile. Note that any file paths entered here will be ignored, as Pdfquad only accepts  profiles from the profiles directory. You can just enter the file name without the path. Use the `list` command to list all available profiles.|
+|batchDir|This defines the batch directory that will be analyzed.|
 
 In addition, the following optional arguments are available:
 
 |Argument|Description|
 |:-----|:--|
-|`--maxpdfs`, `-x`|This defines the maximum number of PDFs that are reported in each output XML file (default: 10).|
-|`--prefixout`, `p`|This defines a text prefix on which the names of the output files are based (default: "pq").|
-|`--outdir`, `-o`|This defines the directory where output is written (default: current working directory from which pdfquad is launched).|
-|`--verbose`, `-b`|This tells pdfquad to report Schematron output in verbose format.|
+|--maxpdfs, -x|This defines the maximum number of PDFs that are reported in each output XML file (default: 10).|
+|--prefixout, -p|This defines a text prefix on which the names of the output files are based (default: "pq").|
+|--outdir, -o|This defines the directory where output is written (default: current working directory from which pdfquad is launched).|
+|--verbose, -b|This tells pdfquad to report Schematron output in verbose format.|
 
 In the simplest case, we can call pdfquad with the profile and the batch directory as the only arguments:
 
@@ -78,7 +79,7 @@ Pdfquad will now recursively traverse all directories and files inside the "myba
 
 ### list command
 
-Run pdfquad with the `list` command to get a list of the available profiles and schemas, as well as their locations. For example:
+Run pdfquad with the *list* command to get a list of the available profiles and schemas, as well as their locations. For example:
 
 ```
 pdfquad list
@@ -94,9 +95,15 @@ Available schemas (directory /home/johan/.config/pdfquad/schemas):
   - pdf-dbnl-50.sch
 ```
 
+### copyps command
+
+If you run pdfquad with the *copyps* command, it will copy the default profiles and schemas that are included in the installation over to your user directory.
+
+**Warning:** any changes you made to the default profiles or schemas will be lost after this operation, so proceed with caution! If you want to keep any of these files, just make a copy and save them under a different name before running the *copyps* command.
+
 ## Profiles
 
-A profile is an XML file that defines how a digitisation batch is evaluated. It is made up of one or more `schema` elements, that each link a file or directory naming pattern to a Schematron file. Here's an example:
+A profile is an XML file that defines how a digitisation batch is evaluated. It is made up of one or more *schema* elements, that each link a file or directory naming pattern to a Schematron file. Here's an example:
 
 ```xml
 <?xml version="1.0"?>
@@ -109,7 +116,7 @@ A profile is an XML file that defines how a digitisation batch is evaluated. It 
 </profile>
 ```
 
-Here we see two `schema` elements. Each element refers to a Schematron file (explained in the next section). The values of the `type`, `match` and `pattern` attributes define how this file is linked to file or directory names inside the batch:
+Here we see two *schema* elements. Each element refers to a Schematron file (explained in the next section). The values of the *type*, *match* and *pattern* attributes define how this file is linked to file or directory names inside the batch:
 
 - If **type** is "fileName", the matching is based on the naming of a PDF. In case of "parentDirName" the matching uses the naming of the direct parent directory of a PDF.
 - The **match** attribute defines whether the matching pattern with the file or directory name is exact ("is") or partial ("startswith", "endswith", "contains".)
