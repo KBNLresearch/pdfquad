@@ -66,9 +66,9 @@
         <!-- Check on PageMode value to ensure document doesn't open with thumbnails -->
         <s:assert test="(count(PageMode[text() = '/UseThumbs']) = 0)">PageMode value is /UseThumbs</s:assert>
         <!-- Check on signatureFlag value to ensure document doesn't contain digital signatures -->
-        <s:assert test="(signatureFlag  = -1)">Document contains one or more digital signatures</s:assert>
+        <s:assert test="(count(signatureFlag[text() != -1]) = 0)">Document contains digital signatures</s:assert>
         <!-- Check on open password -->
-        <s:assert test="(openPassword  = 'False')">Document is protected with open password</s:assert>
+        <s:assert test="(count(openPassword[text()  = 'True']) = 0)">Document is protected with open password</s:assert>
         <!-- Check on absence of any exceptions while parsing at pdf level -->
         <s:assert test="(count(exceptions/exception) = 0)">Parsing at PDF level resulted in one or more exceptions</s:assert>
     </s:rule>

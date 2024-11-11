@@ -110,6 +110,7 @@ def getProperties(PDF):
         pageModeElt.text = pageMode[1]
 
     # Check for digital signatures
+    # signatureFlag. No signatures for value -1; other values (1,3) indicate signatures.
     signatureFlag = doc.get_sigflags()
     signatureFlagElt = etree.Element("signatureFlag")
     signatureFlagElt.text = str(signatureFlag)
@@ -178,10 +179,6 @@ def getPageProperties(doc, page, pageNo):
     if cont.find(b"/Subtype/Watermark") > 0:  # this will confirm a marked-content watermark is present
         annotElt = etree.SubElement(annotsElt,'annotation')
         annotElt.text = "/Watermark"
-
-    cont = bytearray(page.read_contents())  # read the contents source as a (modifyable) bytearray
-    if cont.find(b"/Subtype/Watermark") > 0:  # this will confirm a marked-content watermark is present
-        print("marked-content watermark present")
 
     # TODO also check for Action, e.g. JavaScript actions.
 
