@@ -112,26 +112,21 @@ def getProperties(PDF):
     # Check for digital signatures
     # signatureFlag. No signatures for value -1; other values (1,3) indicate signatures.
     signatureFlag = doc.get_sigflags()
-    signatureFlagElt = etree.Element("signatureFlag")
-    signatureFlagElt.text = str(signatureFlag)
+    signatureElt = etree.Element("containsSignature")
+    signatureElt.text = str(signatureFlag)
 
     # Element object for storing annotation types
     annotsElt =  etree.Element("annotations")
-
-    # Element object for storing optional content groups
-    ocgsElt =  etree.Element("optionalContentGroups")
 
     # JavaScript element
     javaScriptElt = etree.Element("containsJavaScript")
     javaScriptElt.text = str(False)
 
-    # Iterate over all objects and check for annotations,
-    # Optional Content Groups and JavaScript.
-    # This doesn't work for Watermark annotations that are
-    # wrapped inside stream objects, so these are dealt with
-    # separately at the page level.
+    # Iterate over all objects and check for annotations and JavaScript.
+    # This doesn't work for Watermark annotations that are wrapped inside
+    # stream objects, so these are dealt with separately at the page level.
     try:
-        xreflen = doc.xref_length() # number of PDF objects
+        xreflen = doc.xref_length()
         for xref in range(1, xreflen):
             type = doc.xref_get_key(xref, "Type")[1]
             subtype = doc.xref_get_key(xref, "Subtype")[1]
@@ -139,14 +134,19 @@ def getProperties(PDF):
             if type =="/Annot":
                 annotElt = etree.SubElement(annotsElt,'annotation')
                 annotElt.text = subtype
-            elif type == "/OCG":
-                ocgElt = etree.SubElement(ocgsElt,'optionalContentGroups')
             if js != ("null", "null"):
                 javaScriptElt.text = str(True)
     except Exception as e:
         ex = etree.SubElement(exceptionsFileElt,'exception')
         ex.text = str(e)
         logging.warning(("while iterating over PDF objects: {}").format(str(e)))
+
+    # Check for optional content layers
+    optionalContentElt = etree.Element("containsOptionalContent")
+    optionalContentElt.text = str(False)
+    optionalContent = doc.layer_ui_configs()
+    if len(optionalContent) != 0:
+        optionalContentElt.text = str(True)
 
     # Wrapper element for pages output
     pagesElt = etree.Element("pages")
@@ -161,14 +161,14 @@ def getProperties(PDF):
     # Add all remaining elements to properties element
     propertiesElt.append(metadataElt)
     propertiesElt.append(pageModeElt)
-    propertiesElt.append(signatureFlagElt)
+    propertiesElt.append(signatureElt)
+    propertiesElt.append(optionalContentElt)
     propertiesElt.append (javaScriptElt)
-    propertiesElt.append(annotsElt)
-    propertiesElt.append(ocgsElt)
     noPagesElt = etree.Element("noPages")
     noPagesElt.text = str(pages)
     propertiesElt.append(noPagesElt)
     propertiesElt.append(pagesElt)
+    propertiesElt.append(annotsElt)
     propertiesElt.append(exceptionsFileElt)
 
     return propertiesElt
