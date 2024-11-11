@@ -201,8 +201,6 @@ def getPageProperties(doc, page, pageNo):
         annotElt = etree.SubElement(annotsElt,'annotation')
         annotElt.text = "/Watermark"
 
-    # TODO also check for Action, e.g. JavaScript actions.
-
     pageElt.append(annotsElt)
 
     return pageElt
