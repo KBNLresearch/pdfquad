@@ -151,7 +151,7 @@ This is a schema for production master PDFs with images in JPEG format that are 
 |PDF version|1.7|
 |Encryption|Document does not use encryption|
 |Annotations|Document does not contain WaterMark, Screen, Movie, 3D, Sound, FileAttachment, Link, Ink, Popup, Widget, Polygon, Text, FreeText or SVG annotations|
-|Optional Content|Document does not contain any optional content groups|
+|Optional Content|Document does not contain any optional content layers|
 |Images per page|Each page contains exactly 1 image|
 |Watermarks|Document does not contain watermarks|
 |ICC profile|Each image contains an ICC profile, which is either defined as a PDF object, or embedded in the image stream|
