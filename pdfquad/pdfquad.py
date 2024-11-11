@@ -60,6 +60,10 @@ def parseCommandLine():
                                 help="report Schematron report in verbose format")
     parser_list = subparsers.add_parser('list',
                                         help='list available profiles and schemas')
+    parser_copyps = subparsers.add_parser('copyps',
+                                        help='copy default profiles and schemas to \
+                                            user directory, note that this will overwrite \
+                                            any user-modified versions of these files!')
     parser.add_argument('--version', '-v',
                         action="version",
                         version=__version__)
@@ -210,6 +214,14 @@ def main():
         verboseFlag = args.verbose
     elif action == "list":
         schematron.listProfilesSchemas(profilesDir, schemasDir)
+    elif action == "copyps":
+        shutil.copytree(profilesDirPackage, profilesDir, dirs_exist_ok=True)
+        msg = ("copied profiles from {} to {}").format(profilesDirPackage, profilesDir)
+        print(msg)
+        shutil.copytree(schemasDirPackage, schemasDir, dirs_exist_ok=True)
+        msg = ("copied schemas from {} to {}").format(schemasDirPackage, schemasDir)
+        print(msg)
+        sys.exit()
     elif action is None:
         print('')
         parser.print_help()
