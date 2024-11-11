@@ -118,7 +118,11 @@ def getProperties(PDF):
     # Element object for storing annotation types
     annotsElt =  etree.Element("annotations")
 
-    # Iterate over all objects and check for annotations
+    # Element object for storing optional content groups
+    ocgsElt =  etree.Element("optionalContentGroups")
+
+    # Iterate over all objects and check for annotations and Optional
+    # Content Groups
     # This doesn't work for Watermark annotations that are wrapped inside
     # stream objects!
     xreflen = doc.xref_length() # number of PDF objects
@@ -128,6 +132,8 @@ def getProperties(PDF):
         if type =="/Annot":
             annotElt = etree.SubElement(annotsElt,'annotation')
             annotElt.text = subtype
+        elif type == "/OCG":
+            ocgElt = etree.SubElement(ocgsElt,'optionalContentGroups')
 
     # Wrapper element for pages output
     pagesElt = etree.Element("pages")
@@ -144,6 +150,7 @@ def getProperties(PDF):
     propertiesElt.append(pageModeElt)
     propertiesElt.append(signatureFlagElt)
     propertiesElt.append(annotsElt)
+    propertiesElt.append(ocgsElt)
     noPagesElt = etree.Element("noPages")
     noPagesElt.text = str(pages)
     propertiesElt.append(noPagesElt)
