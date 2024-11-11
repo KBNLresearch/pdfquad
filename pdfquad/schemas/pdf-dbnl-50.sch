@@ -18,8 +18,12 @@
     <s:rule context="//properties/pages/page">
         <!-- Check on presence of only 1 image for each page -->
         <s:assert test="(count(image) = 1)">Unexpected number of images on page (expected: 1)</s:assert>
-        <!-- Check on absence of watermarks -->
-        <s:assert test="(containsWatermark = 'False')">Page contains watermark</s:assert>
+    </s:rule>
+
+    <!-- Checks at page annotations level -->
+    <s:rule context="//properties/pages/page/annotations">
+        <!-- Check on absence of watermark annotations -->
+        <s:assert test="(count(annotation[text() = '/Watermark']) = 0)">PDF contains Watermark annotation</s:assert>
     </s:rule>
 
     <!-- Checks at PDF object dictionary level -->
@@ -60,7 +64,7 @@
     <!-- Checks at properties level -->
     <s:rule context="//properties">
         <!-- Check on PageMode value to ensure document doesn't open with thumbnails -->
-        <s:assert test="(PageMode  != '/UseThumbs')">PageMode value is /UseThumbs</s:assert>
+        <s:assert test="(count(PageMode[text() = '/UseThumbs']) = 0)">PageMode value is /UseThumbs</s:assert>
         <!-- Check on signatureFlag value to ensure document doesn't contain digital signatures -->
         <s:assert test="(signatureFlag  = -1)">Document contains one or more digital signatures</s:assert>
         <!-- Check on open password -->

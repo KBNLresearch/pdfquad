@@ -177,7 +177,7 @@ def getPageProperties(doc, page, pageNo):
     cont = bytearray(page.read_contents())  # read the contents source as a (modifyable) bytearray
     if cont.find(b"/Subtype/Watermark") > 0:  # this will confirm a marked-content watermark is present
         annotElt = etree.SubElement(annotsElt,'annotation')
-        annotElt.text = "Watermark"
+        annotElt.text = "/Watermark"
 
     cont = bytearray(page.read_contents())  # read the contents source as a (modifyable) bytearray
     if cont.find(b"/Subtype/Watermark") > 0:  # this will confirm a marked-content watermark is present
