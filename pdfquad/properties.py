@@ -121,20 +121,28 @@ def getProperties(PDF):
     # Element object for storing optional content groups
     ocgsElt =  etree.Element("optionalContentGroups")
 
-    # Iterate over all objects and check for annotations and Optional
-    # Content Groups
-    # This doesn't work for Watermark annotations that are wrapped inside
-    # stream objects!
+    # JavaScript element
+    javaScriptElt = etree.Element("containsJavaScript")
+    javaScriptElt.text = str(False)
+
+    # Iterate over all objects and check for annotations,
+    # Optional Content Groups and JavaScript.
+    # This doesn't work for Watermark annotations that are
+    # wrapped inside stream objects, so these are dealt with
+    # separately at the page level.
     try:
         xreflen = doc.xref_length() # number of PDF objects
         for xref in range(1, xreflen):
             type = doc.xref_get_key(xref, "Type")[1]
             subtype = doc.xref_get_key(xref, "Subtype")[1]
+            js = doc.xref_get_key(xref, "JS")
             if type =="/Annot":
                 annotElt = etree.SubElement(annotsElt,'annotation')
                 annotElt.text = subtype
             elif type == "/OCG":
                 ocgElt = etree.SubElement(ocgsElt,'optionalContentGroups')
+            if js != ("null", "null"):
+                javaScriptElt.text = str(True)
     except Exception as e:
         ex = etree.SubElement(exceptionsFileElt,'exception')
         ex.text = str(e)
@@ -154,6 +162,7 @@ def getProperties(PDF):
     propertiesElt.append(metadataElt)
     propertiesElt.append(pageModeElt)
     propertiesElt.append(signatureFlagElt)
+    propertiesElt.append (javaScriptElt)
     propertiesElt.append(annotsElt)
     propertiesElt.append(ocgsElt)
     noPagesElt = etree.Element("noPages")
