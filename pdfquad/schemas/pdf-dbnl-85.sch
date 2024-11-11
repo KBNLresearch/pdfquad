@@ -12,12 +12,14 @@
         <s:assert test="(count(PageMode[text() = '/UseThumbs']) = 0)">PDF is set to open with thumbnails</s:assert>
         <!-- Check on PageMode value to ensure document doesn't contain file attachments -->
         <s:assert test="(count(PageMode[text() = '/UseAttachments']) = 0)">PDF contains file attachments</s:assert>
-        <!-- Check on signatureFlag value to ensure document doesn't contain digital signatures -->
-        <s:assert test="(count(signatureFlag[text() != -1]) = 0)">Document contains digital signatures</s:assert>
+        <!-- Check on containsSignature value to ensure document doesn't contain digital signatures -->
+        <s:assert test="(count(containsSignature[text() != -1]) = 0)">Document contains digital signatures</s:assert>
         <!-- Check on presence of JavaScript -->
         <s:assert test="(count(containsJavaScript[text() = 'True']) = 0)">Document contains JavaScript</s:assert>
         <!-- Check on open password -->
         <s:assert test="(count(openPassword[text()  = 'True']) = 0)">Document is protected with open password</s:assert>
+        <!-- Check on absence of optional content -->
+        <s:assert test="(count(containsOptionalContent[text() = 'True']) = 0)">PDF contains optional content</s:assert>
         <!-- Check on absence of any exceptions while parsing at pdf level -->
         <s:assert test="(count(exceptions/exception) = 0)">Parsing at PDF level resulted in one or more exceptions</s:assert>
     </s:rule>
@@ -50,12 +52,6 @@
         <s:assert test="(count(annotation[text() = '/Text']) = 0)">PDF contains Text annotation</s:assert>
         <s:assert test="(count(annotation[text() = '/FreeText']) = 0)">PDF contains FreeText annotation</s:assert>
         <s:assert test="(count(annotation[text() = '/SVG']) = 0)">PDF contains SVG annotation</s:assert>
-    </s:rule>
-
-    <!-- Checks at optional content groups level -->
-    <s:rule context="//properties/optionalContentGroups">
-        <!-- Check on absence of optional content groups -->
-        <s:assert test="(count(optionalContentGroup) = 0)">PDF contains optional content groups</s:assert>
     </s:rule>
 
     <!-- Checks at page level -->
