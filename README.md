@@ -138,6 +138,7 @@ This is a schema for production master PDFs with images in JPEG format that are 
 |PDF version|1.7|
 |Encryption|Document does not use encryption|
 |Images per page|1|
+|Watermarks|Document does not contain watermarks|
 |Filter value of image XObject|DCTDecode|
 |Image stream format|JPEG|
 |Image stream resolution (ppi)|Within range \[299, 301\]|
@@ -161,6 +162,7 @@ This is a schema for small access PDFs with images in JPEG format that are compr
 |PDF version|1.7|
 |Encryption|Document does not use encryption|
 |Images per page|1|
+|Watermarks|Document does not contain watermarks|
 |Filter value of image XObject|DCTDecode|
 |Image stream format|JPEG|
 |Image stream resolution (ppi)|Within range \[299, 301\]|

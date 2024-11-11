@@ -143,11 +143,25 @@ def getPageProperties(doc, page, pageNo):
     # Create element object to store all page level properties
     pageElt = etree.Element("page")
     pageElt.attrib["number"] = str(pageNo)
+
+    # Iterate over all images on this page
     images = page.get_images(full=False)
     for image in images:
         imageElt = getImageProperties(doc, image, pageNo)
         # Add image element to page element
         pageElt.append(imageElt)
+
+    # Check if page contains watermark annotations
+    # Source: https://github.com/pymupdf/PyMuPDF/discussions/1855#discussioncomment-3324039
+    containsWatermark = False
+    page.clean_contents()
+    cont = bytearray(page.read_contents())
+    if cont.find(b"/Subtype/Watermark") > 0:
+        containsWatermark = True
+
+    containsWatermarkElt = etree.Element("containsWatermark")
+    containsWatermarkElt.text = str(containsWatermark)
+    pageElt.append(containsWatermarkElt)
 
     return pageElt
 
