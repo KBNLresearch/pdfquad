@@ -125,15 +125,20 @@ def getProperties(PDF):
     # Content Groups
     # This doesn't work for Watermark annotations that are wrapped inside
     # stream objects!
-    xreflen = doc.xref_length() # number of PDF objects
-    for xref in range(1, xreflen):
-        type = doc.xref_get_key(xref, "Type")[1]
-        subtype = doc.xref_get_key(xref, "Subtype")[1]
-        if type =="/Annot":
-            annotElt = etree.SubElement(annotsElt,'annotation')
-            annotElt.text = subtype
-        elif type == "/OCG":
-            ocgElt = etree.SubElement(ocgsElt,'optionalContentGroups')
+    try:
+        xreflen = doc.xref_length() # number of PDF objects
+        for xref in range(1, xreflen):
+            type = doc.xref_get_key(xref, "Type")[1]
+            subtype = doc.xref_get_key(xref, "Subtype")[1]
+            if type =="/Annot":
+                annotElt = etree.SubElement(annotsElt,'annotation')
+                annotElt.text = subtype
+            elif type == "/OCG":
+                ocgElt = etree.SubElement(ocgsElt,'optionalContentGroups')
+    except Exception as e:
+        ex = etree.SubElement(exceptionsFileElt,'exception')
+        ex.text = str(e)
+        logging.warning(("while iterating over PDF objects: {}").format(str(e)))
 
     # Wrapper element for pages output
     pagesElt = etree.Element("pages")
