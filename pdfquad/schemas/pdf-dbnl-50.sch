@@ -50,6 +50,12 @@
         <s:assert test="(count(annotation[text() = '/SVG']) = 0)">PDF contains SVG annotation</s:assert>
     </s:rule>
 
+    <!-- Checks at optional content groups level -->
+    <s:rule context="//properties/optionalContentGroups">
+        <!-- Check on absence of optional content groups -->
+        <s:assert test="(count(optionalContentGroup) = 0)">PDF contains optional content groups</s:assert>
+    </s:rule>
+
     <!-- Checks at page level -->
     <s:rule context="//properties/pages/page">
         <!-- Check on presence of only 1 image for each page -->
