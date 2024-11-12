@@ -12,8 +12,8 @@
         <s:assert test="(count(PageMode[text() = '/UseThumbs']) = 0)">PDF is set to open with thumbnails</s:assert>
         <!-- Check on PageMode value to ensure document doesn't contain file attachments -->
         <s:assert test="(count(PageMode[text() = '/UseAttachments']) = 0)">PDF contains file attachments</s:assert>
-        <!-- Check on containsSignature value to ensure document doesn't contain digital signatures -->
-        <s:assert test="(count(containsSignature[text() != -1]) = 0)">Document contains digital signatures</s:assert>
+        <!-- Check on signatureFlag value to ensure document doesn't contain digital signatures -->
+        <s:assert test="(count(signatureFlag[text() != -1]) = 0)">Document contains digital signatures</s:assert>
         <!-- Check on presence of JavaScript -->
         <s:assert test="(count(containsJavaScript[text() = 'True']) = 0)">Document contains JavaScript</s:assert>
         <!-- Check on open password -->
