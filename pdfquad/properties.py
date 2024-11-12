@@ -112,7 +112,7 @@ def getProperties(PDF):
     # Check for digital signatures
     # signatureFlag. No signatures for value -1; other values (1,3) indicate signatures.
     signatureFlag = doc.get_sigflags()
-    signatureElt = etree.Element("containsSignature")
+    signatureElt = etree.Element("signatureFlag")
     signatureElt.text = str(signatureFlag)
 
     # Element object for storing annotation types
