@@ -22,7 +22,7 @@ pdfquad
 
 Depending on your system, pdfquad will create a folder named *pdfquad* in one of the following locations: 
 
-- For Linux, it will use the location defined by environment variable `$XDG_CONFIG_HOME`. If this variable is not set, it will use the *.config* directory in the user's home folder (e.g. `/home/johan/.config/pdfquad`). Note that the *.config* directory is hidden by default.
+- For Linux, it will use the location defined by environment variable *$XDG_CONFIG_HOME*. If this variable is not set, it will use the *.config* directory in the user's home folder (e.g. `/home/johan/.config/pdfquad`). Note that the *.config* directory is hidden by default.
 - For Windows, it will use the *AppData\Local* folder (e.g. `C:\Users\johan\AppData\Local\pdfquad`).
 
 The folder contains two subdirectories named *profiles* and *schemas*, which are explained in the "Profiles" and "Schemas" sections below.
@@ -57,7 +57,7 @@ The *process* command expects the following positional arguments:
 
 |Argument|Description|
 |:-----|:--|
-|profile|This defines the validation profile. Note that any file paths entered here will be ignored, as Pdfquad only accepts  profiles from the profiles directory. You can just enter the file name without the path. Use the `list` command to list all available profiles.|
+|profile|This defines the validation profile. Note that any file paths entered here will be ignored, as Pdfquad only accepts  profiles from the profiles directory. You can just enter the file name without the path. Use the *list* command to list all available profiles.|
 |batchDir|This defines the batch directory that will be analyzed.|
 
 In addition, the following optional arguments are available:
@@ -206,7 +206,7 @@ Since these files can get really large, Pdfquad splits the results across multip
 - pq_mybatch_002.xml
 - etcetera
 
-By default Pdfquad limits the number of reported PDFs for each output file to 10, after which it creates a new file. This behaviour can be changed by using the `--maxpdfs` (alias `-x`) option. For example, the command below will limit the number of PDFs per output file to 1 (so each PDF will have its dedicated output file):
+By default Pdfquad limits the number of reported PDFs for each output file to 10, after which it creates a new file. This behaviour can be changed by using the *--maxpdfs* (alias *-x*) option. For example, the command below will limit the number of PDFs per output file to 1 (so each PDF will have its dedicated output file):
 
 ```
 pdfquad process dbnl-fulltext.xml ./mybatch -x 1
@@ -219,8 +219,8 @@ This is a comma-delimited text file with, for each PDF, the following columns:
 |Column|Description|
 |:-----|:--|
 |file|Full path to the PDF file.|
-|validationSuccess|Flag with value `True` if Schematron validation was succesful, and `False` if not. A value `False` indicates that the file could not be validated (e.g. because no matching schema was found, or the validation resulted in an unexpected exception)|
-|validationOutcome|The outcome of the Schematron validation/assessment. Value is `pass` if file passed all tests, and `fail` otherwise. Note that it is automatically set to "false" if the Schematron validation was unsuccessful (i.e. "validationSuccess" is `False`|
+|validationSuccess|Flag with value *True* if Schematron validation was succesful, and *False* if not. A value *False* indicates that the file could not be validated (e.g. because no matching schema was found, or the validation resulted in an unexpected exception)|
+|validationOutcome|The outcome of the Schematron validation/assessment. Value is *Pass* if file passed all tests, and *Fail* otherwise. Note that it is automatically set to *Fail* if the Schematron validation was unsuccessful (i.e. "validationSuccess" is *False*)|
 |noPages|The number of pages in the document.|
 |fileOut|Corresponding comprehensive output file with full output for this PDF.|
 
