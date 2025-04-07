@@ -12,6 +12,7 @@ PDF properties extraction module
 import os
 import io
 import logging
+import base64
 from lxml import etree
 import pymupdf
 import PIL
@@ -215,10 +216,24 @@ def getImageProperties(doc, image, pageNo):
     # Extract dictionary-level properties
     propsDictElt = getImageDictProperties(image, pageNo)
 
-    # Get raw image stream from xref           
+    # Check xref and filter values
+    # TODO: in case of multiple Filter values, e.g.:
+    #  /Filter [ /ASCII85Decode /DCTDecode ]
+    # PyMuPDF only returns the first one, which means
+    # check on DCTDecode value will fail! 
     xref = int(propsDictElt.find('xref').text)
-    stream = doc.xref_stream_raw(xref)
-    
+    filter = propsDictElt.find('filter').text
+
+    # Get raw stream data
+    streamRaw = doc.xref_stream_raw(xref)
+
+    # Decode stream if necessary (TODO: perhaps add support for
+    # AsciiHexDecode, LZWDecode and FlateDecode filters?)
+    if filter == "ASCII85Decode":
+        stream = base64.a85decode(streamRaw, adobe=True)
+    else:
+        stream = streamRaw
+
     # Extract stream properties
     propsStreamElt = getImageStreamProperties(stream, pageNo)
 

@@ -9,8 +9,8 @@ element links a search pattern to a corresponding schema
 - Value for "match" is either "is", "startswith", "endswith" or "contains"
 -->
 
-<schema type="fileName" match="endswith" pattern="_85">pdf-dbnl-85.sch</schema>
-<schema type="fileName" match="endswith" pattern="_50">pdf-dbnl-50.sch</schema>
+<schema type="fileName" match="endswith" pattern="_85.pdf">pdf-dbnl-85.sch</schema>
+<schema type="fileName" match="endswith" pattern="_50.pdf">pdf-dbnl-50.sch</schema>
 
 </profile>
 
