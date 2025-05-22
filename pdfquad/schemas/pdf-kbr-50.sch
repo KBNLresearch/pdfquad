@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- Schematron rules for KB Brussel PDFs -->
+<!-- Schematron rules for KBR PDFs -->
 
 <s:schema xmlns:s="http://purl.oclc.org/dsdl/schematron">
 

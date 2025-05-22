@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+
+<profile>
+
+<!-- Profile for KBR digitization batches. Each "schema"
+element links a search pattern to a corresponding schema
+
+- Value for "type" is either "fileName or "parentDirName"
+- Value for "match" is either "is", "startswith", "endswith" or "contains"
+-->
+
+<schema type="fileName" match="endswith" pattern="_85.pdf">pdf-kbr-85.sch</schema>
+<schema type="fileName" match="endswith" pattern="_50.pdf">pdf-kbr-50.sch</schema>
+
+</profile>
+
+
