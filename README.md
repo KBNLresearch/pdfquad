@@ -131,6 +131,7 @@ Currently the following profiles are included:
 |Profile|Description|
 |:--|:--|
 |dbnl-fulltext.xml|Profile for DBNL full-text digitisation batches.|
+|kbr.xml|Profile for KBR digitisation batches.|
 
 ## Schemas
 
@@ -191,6 +192,14 @@ This is a schema for small access PDFs with images in JPEG format that are compr
 |Image stream color components|3|
 |Image stream JPEG Quality|Within range \[48, 52\]|
 |Exceptions, stream|Parsing of the image streams did not result in any exceptions|
+
+### pdf-kbr-85.sch
+
+As pdf-dbnl-85.sch, but without checks on ICC profile and filter value of image dictionary.
+
+### pdf-kbr-50.sch
+
+As pdf-dbnl-50.sch, but without checks on ICC profile and filter value of image dictionary.
 
 ## Output
 
