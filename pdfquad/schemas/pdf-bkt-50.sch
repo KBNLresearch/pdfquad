@@ -37,9 +37,11 @@
         <s:assert test="(count(producer) > 0)">Missing producer metadata field</s:assert>
         <s:assert test="(count(creationDate) > 0)">Missing creationDate metadata field</s:assert>
         <s:assert test="(count(modDate) > 0)">Missing modDate metadata field</s:assert>
+        <s:assert test="(count(title) > 0)">Missing title metadata field</s:assert>
+        <!-- TODO pymudf doesn't extract the copyright-information field (which I think is also not a standard field). Exiftool does report
+        it for the files in the test batch though. Needs a further look! -->
         <s:assert test="(count(copyright-information) > 0)">Missing copyright-information metadata field</s:assert>
-        <!-- TODO copyright-information is not a standard field, and it's also not present in the test batch. Needs
-        further look! -->
+        <s:assert test="(count(keywords) > 0)">Missing keywords metadata field</s:assert>
         <!-- Check on encryption -->
         <s:assert test="(encryption = 'None')">PDF uses encryption</s:assert>
     </s:rule>
