@@ -20,7 +20,7 @@ from . import properties
 from . import schematron
 from . import shared
 
-__version__ = "0.4.1a"
+__version__ = "0.4.0a1"
 
 # Create parser
 parser = argparse.ArgumentParser(description="PDF QUality Assessment for Digitisation batches")
