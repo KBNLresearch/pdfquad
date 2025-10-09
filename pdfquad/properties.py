@@ -110,6 +110,14 @@ def getProperties(PDF):
     else:
         pageModeElt.text = pageMode[1]
 
+    # Check if document is linearized (AKA fast web view/access)
+    linearizedElt = etree.Element("isLinearized")
+    isLinearized = doc.is_fast_webaccess
+    if isLinearized:
+        linearizedElt.text = str(True)
+    else:
+        linearizedElt.text = str(False)
+
     # Check for digital signatures
     # signatureFlag. No signatures for value -1; other values (1,3) indicate signatures.
     signatureFlag = doc.get_sigflags()
@@ -163,6 +171,7 @@ def getProperties(PDF):
     # Add all remaining elements to properties element
     propertiesElt.append(metadataElt)
     propertiesElt.append(pageModeElt)
+    propertiesElt.append(linearizedElt)
     propertiesElt.append(signatureElt)
     propertiesElt.append(optionalContentElt)
     propertiesElt.append (javaScriptElt)
