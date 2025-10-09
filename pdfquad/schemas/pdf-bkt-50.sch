@@ -27,7 +27,9 @@
     <!-- Checks at PDF metadata level -->
     <s:rule context="//properties/meta">
         <!-- Check on PDF version -->
+        <!-- TODO BKT requirement is Acrobat 6.0 compatible, which implies PDF 1.5. But this dates back to 2003!
         <s:assert test="(format = 'PDF 1.7')">Unexpected PDF version (expected: 1.7)</s:assert>
+        -->
         <!-- Check on encryption -->
         <s:assert test="(encryption = 'None')">PDF uses encryption</s:assert>
     </s:rule>
@@ -79,7 +81,10 @@
         <!-- Check on presence of stream element -->
         <s:assert test="(count(stream) = 1)">Missing output element for image stream</s:assert>
         <!-- Check on presence of ICC profile, which can be embedded as a PDF object, in the JPEG image stream, or both -->
+        <!-- TODO BKT specs dicate "device independent colorspace such as CalGray", without mentioning whether it
+         is defined by an ICC profile or otherwise
         <s:assert test="(dict/colorspace = 'ICCBased') or (stream/icc_profile)">Missing embedded ICC profile</s:assert>
+        -->
         <!-- Consistency checks on width, height values at pdf and image stream levels -->
         <s:assert test="(dict/width = stream/width)">Width values at PDF and image stream levels are not the same</s:assert>
         <s:assert test="(dict/height = stream/height)">Height values at PDF and image stream levels are not the same</s:assert>
@@ -98,12 +103,12 @@
         <!-- Check on expected format of the image stream -->
         <s:assert test="(format = 'JPEG')">Unexpected image stream format (expected: JPEG)</s:assert>
         <!-- Check on horizontal and vertical resolution (with tolerance of +/- 1 ppi) -->
-        <s:assert test="(jfif_density_x &gt;= 299) and
-        (jfif_density_x &lt;= 301)">Horizontal resolution outside permitted range</s:assert>
-        <s:assert test="(jfif_density_y &gt;= 299) and
-        (jfif_density_y &lt;= 301)">Vertical resolution outside permitted range</s:assert>
+        <s:assert test="(jfif_density_x &gt;= 149) and
+        (jfif_density_x &lt;= 151)">Horizontal resolution outside permitted range</s:assert>
+        <s:assert test="(jfif_density_y &gt;= 149) and
+        (jfif_density_y &lt;= 151)">Vertical resolution outside permitted range</s:assert>
         <!-- Check on expected number of color components -->
-        <s:assert test="(components = '3')">Unexpected number of color components (expected: 3)</s:assert>
+        <s:assert test="(components = '1')">Unexpected number of color components (expected: 1)</s:assert>
         <!-- Check on JPEG compression quality level (with tolerance of +/- 2 levels) -->
         <s:assert test="(JPEGQuality &gt;= 48) and
         (JPEGQuality &lt;= 52)">JPEG compression quality outside permitted range</s:assert>
