@@ -149,6 +149,7 @@ def getProperties(PDF):
     if len(optionalContent) != 0:
         optionalContentElt.text = str(True)
 
+
     # Wrapper element for pages output
     pagesElt = etree.Element("pages")
 
@@ -203,6 +204,12 @@ def getPageProperties(doc, page, pageNo):
         annotElt.text = "/Watermark"
 
     pageElt.append(annotsElt)
+
+    # Element with number of text characters
+    textLengthElt = etree.Element("textLength")
+    text = page.get_text()
+    textLengthElt.text = str(len(text))
+    pageElt.append(textLengthElt)
 
     return pageElt
 
