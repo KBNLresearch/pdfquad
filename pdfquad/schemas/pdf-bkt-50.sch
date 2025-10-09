@@ -54,6 +54,12 @@
         <s:assert test="(count(annotation[text() = '/SVG']) = 0)">PDF contains SVG annotation</s:assert>
     </s:rule>
 
+    <!-- Checks at pages level -->
+    <s:rule context="//properties/pages">
+        <!-- Check on presence of at least one page with text content (used as indication of presence of OCR layer) -->
+        <s:assert test="(count(page/textLength[text() > 0]) > 0)">PDF contains no text</s:assert>
+    </s:rule>
+
     <!-- Checks at page level -->
     <s:rule context="//properties/pages/page">
         <!-- Check on presence of only 1 image for each page -->
