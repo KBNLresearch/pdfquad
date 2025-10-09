@@ -32,6 +32,14 @@
         <!-- TODO BKT requirement is Acrobat 6.0 compatible, which implies PDF 1.5. But this dates back to 2003!
         <s:assert test="(format = 'PDF 1.7')">Unexpected PDF version (expected: 1.7)</s:assert>
         -->
+        <!-- Checks on required metadata fields -->
+        <s:assert test="(count(creator) > 0)">Missing creator metadata field</s:assert>
+        <s:assert test="(count(producer) > 0)">Missing producer metadata field</s:assert>
+        <s:assert test="(count(creationDate) > 0)">Missing creationDate metadata field</s:assert>
+        <s:assert test="(count(modDate) > 0)">Missing modDate metadata field</s:assert>
+        <s:assert test="(count(copyright-information) > 0)">Missing copyright-information metadata field</s:assert>
+        <!-- TODO copyright-information is not a standard field, and it's also not present in the test batch. Needs
+        further look! -->
         <!-- Check on encryption -->
         <s:assert test="(encryption = 'None')">PDF uses encryption</s:assert>
     </s:rule>
