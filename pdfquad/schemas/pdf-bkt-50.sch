@@ -20,6 +20,8 @@
         <s:assert test="(count(openPassword[text()  = 'True']) = 0)">Document is protected with open password</s:assert>
         <!-- Check on absence of optional content -->
         <s:assert test="(count(containsOptionalContent[text() = 'True']) = 0)">PDF contains optional content</s:assert>
+        <!-- Check that PDF is linearized (Fast Web View) -->
+        <s:assert test="(isLinearized = 'True')">PDF is not linearized (no fast web view)</s:assert>
         <!-- Check on absence of any exceptions while parsing at pdf level -->
         <s:assert test="(count(exceptions/exception) = 0)">Parsing at PDF level resulted in one or more exceptions</s:assert>
     </s:rule>
