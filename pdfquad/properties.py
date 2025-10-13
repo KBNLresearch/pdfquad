@@ -9,6 +9,7 @@ Copyright 2024, KB/National Library of the Netherlands
 PDF properties extraction module
 
 """
+import sys
 import os
 import io
 import logging
@@ -96,8 +97,25 @@ def getProperties(PDF):
 
     # Page count
     pages = doc.page_count
-    # Document metadata
-    metadata = doc.metadata
+
+    # Document metadata. PyMuPDF's doc.metadata method only returns the fields
+    # that are defined in the PDF spec, so instead we use a more low-level approach
+    # that extracts all fields 
+
+    metadata = {}
+
+    # Read Info key from document trailer, which contains xref reference to document
+    # information dictionary, which holds the metadata
+    _ , trailerInfo = doc.xref_get_key(-1, "Info")
+    try:
+        infoXref = int(trailerInfo.split()[0])
+        infoKeys = doc.xref_get_keys(infoXref)
+        for key in infoKeys:
+            _ , value = doc.xref_get_key(infoXref, key)
+            metadata[key] = value
+    except:
+        pass
+
     metadataElt = dictionaryToElt('meta', metadata)
 
     # Read pageMode from document catalog (if it exists)
