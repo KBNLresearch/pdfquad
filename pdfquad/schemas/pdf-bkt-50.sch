@@ -40,6 +40,7 @@
         <s:assert test="(count(Title) > 0)">Missing title metadata field</s:assert>
         <s:assert test="(count(Copyright-Information) > 0)">Missing Copyright-Information metadata field</s:assert>
         <s:assert test="(count(Keywords) > 0)">Missing Keywords metadata field</s:assert>
+        <s:assert test="(Keywords = 'Gedigitaliseerd door de Koninklijke Bibliotheek; Nederlandse geschiedenis; kranten, historische kranten, oude kranten, archief kranten, krantenarchieven, krant online, familieberichten, stamboom familie, dagblad, overlijdensberichten, nieuwsberichten, Nederlandstalige kranten, namen familie, familie Nederland, oorlogskranten, kranten van toen, Surinaamse kranten, Indische kranten, Antilliaanse kranten, databank kranten')">Unexpected value of Keywords metadata field</s:assert>
         <!-- Check on encryption -->
         <s:assert test="(encryption = 'None')">PDF uses encryption</s:assert>
     </s:rule>
