@@ -132,6 +132,8 @@ Currently the following profiles are included:
 |:--|:--|
 |dbnl-fulltext.xml|Profile for DBNL full-text digitisation batches.|
 |kbr.xml|Profile for KBR digitisation batches.|
+|bkt-achtervang-kranten.xml|Profile for BKT newspapers batches.|
+|bkt-achtervang-tijdschriften.xml|Profile for BKT periodicals batches.|
 
 ## Schemas
 
