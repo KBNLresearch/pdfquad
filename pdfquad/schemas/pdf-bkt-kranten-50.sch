@@ -38,7 +38,8 @@
         <s:assert test="(count(CreationDate) > 0)">Missing CreationDate metadata field</s:assert>
         <s:assert test="(count(ModDate) > 0)">Missing ModDate metadata field</s:assert>
         <s:assert test="(count(Title) > 0)">Missing title metadata field</s:assert>
-        <s:assert test="(count(Copyright-Information) > 0)">Missing Copyright-Information metadata field</s:assert>
+        <s:assert test="(count(Copyright-information) > 0)">Missing Copyright-information metadata field</s:assert>
+        <s:assert test="(Copyright-information = 'Gedigitaliseerd door de Koninklijke Bibliotheek, de Nationale Bibliotheek van Nederland / Digitised by the Koninklijke Bibliotheek, the National Library of the Netherlands')">Unexpected value of Copyright-information field</s:assert>
         <s:assert test="(count(Keywords) > 0)">Missing Keywords metadata field</s:assert>
         <s:assert test="(Keywords = 'Gedigitaliseerd door de Koninklijke Bibliotheek; Nederlandse geschiedenis; kranten, historische kranten, oude kranten, archief kranten, krantenarchieven, krant online, familieberichten, stamboom familie, dagblad, overlijdensberichten, nieuwsberichten, Nederlandstalige kranten, namen familie, familie Nederland, oorlogskranten, kranten van toen, Surinaamse kranten, Indische kranten, Antilliaanse kranten, databank kranten')">Unexpected value of Keywords metadata field</s:assert>
         <!-- Check on encryption -->
