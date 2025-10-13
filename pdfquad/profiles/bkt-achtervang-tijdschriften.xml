@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+
+<profile>
+
+<!-- Profile for BKT Tijdschriften digitization batches -->
+
+<schema type="parentDirName" match="is" pattern="pdf">pdf-bkt-tijdschriften-50.sch</schema>
+
+</profile>
+
+

@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
-<!-- Schematron rules for BKT PDFs -->
+<!-- Schematron rules for BKT PDFs Kranten-->
 
 <s:schema xmlns:s="http://purl.oclc.org/dsdl/schematron">
 
 <s:pattern>
-    <s:title>BKT profile checks</s:title>
+    <s:title>BKT Kranten profile checks</s:title>
 
     <!-- Checks at properties level -->
     <s:rule context="//properties">
