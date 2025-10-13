@@ -116,6 +116,18 @@ def getProperties(PDF):
     except:
         pass
 
+    # Add "format" and "encryption" entries from previously 
+    # used doc.metadata method
+    try:
+        metadata["format"] = doc.metadata["format"]
+    except KeyError:
+        pass
+    try:
+        metadata["encryption"] = doc.metadata["encryption"]
+    except KeyError:
+        pass
+
+    # Convert to element
     metadataElt = dictionaryToElt('meta', metadata)
 
     # Read pageMode from document catalog (if it exists)
